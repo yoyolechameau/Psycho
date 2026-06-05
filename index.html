@@ -337,7 +337,10 @@
   </div>
 </div>
 
-<script src="data.js"></script>
+<script>
+/* anti-cache : ajoute un horodatage unique pour toujours charger le data.js le plus récent */
+document.write('<script src="data.js?t=' + Date.now() + '"></' + 'script>');
+</script>
 <script>
 
 /* ---------- Rendering ---------- */
@@ -417,115 +420,4 @@ DATA.chapters.forEach(ch=>{
     stream.appendChild(card);
 
     const li = document.createElement('li');
-    li.innerHTML = `<a role="button" tabindex="0" data-target="${en.id}">${en.tag} — ${en.title}</a>`;
-    tocList.appendChild(li);
-  });
-});
-
-/* ---------- TOC navigation (no links, pure scroll) ---------- */
-function goTo(id){
-  const card = document.getElementById(id);
-  if(!card) return;
-  card.classList.remove('collapsed');   // ouvre la carte si elle était repliée
-  card.classList.remove('hidden');
-  card.scrollIntoView({behavior:'smooth', block:'start'});
-}
-tocList.addEventListener('click', e=>{
-  const a = e.target.closest('a[data-target]');
-  if(!a) return;
-  e.preventDefault();
-  goTo(a.dataset.target);
-});
-tocList.addEventListener('keydown', e=>{
-  if((e.key==='Enter'||e.key===' ') && e.target.dataset && e.target.dataset.target){
-    e.preventDefault();
-    goTo(e.target.dataset.target);
-  }
-});
-
-/* ---------- Search ---------- */
-const search = document.getElementById('search');
-const noResults = document.getElementById('noResults');
-const cards = [...document.querySelectorAll('.card')];
-const chapHeads = [...document.querySelectorAll('.chap-head')];
-const fab = document.getElementById('fabSearch');
-const panel = document.getElementById('searchPanel');
-const clearBtn = document.getElementById('clearSearch');
-
-function openSearch(){ panel.classList.add('open'); setTimeout(()=>search.focus(),60); }
-function closeSearch(){ panel.classList.remove('open'); }
-function toggleSearch(){ panel.classList.contains('open') ? closeSearch() : openSearch(); }
-
-fab.addEventListener('click', e=>{ e.stopPropagation(); toggleSearch(); });
-clearBtn.addEventListener('click', e=>{ e.stopPropagation(); search.value=''; runFilter(); search.focus(); });
-panel.addEventListener('click', e=>{ e.stopPropagation(); }); /* un tap dans le panneau ne le ferme pas */
-
-/* fermer en cliquant à l'extérieur (les clics fab/panneau ne remontent pas jusqu'ici) */
-document.addEventListener('click', ()=>{ if(panel.classList.contains('open')) closeSearch(); });
-
-function runFilter(){
-  const q = search.value.trim().toLowerCase();
-  clearBtn.classList.toggle('show', q.length>0);
-  let visible = 0;
-  cards.forEach(c=>{
-    const match = !q || c.dataset.search.includes(q);
-    c.classList.toggle('hidden', !match);
-    if(match) visible++;
-  });
-  chapHeads.forEach(h=>{
-    const any = cards.some(c=>c.dataset.chap===h.dataset.chap && !c.classList.contains('hidden'));
-    h.classList.toggle('hidden', !any);
-  });
-  document.querySelectorAll('#toc-list a').forEach(a=>{
-    const c = document.getElementById(a.dataset.target);
-    a.parentElement.classList.toggle('hidden', c.classList.contains('hidden'));
-  });
-  noResults.classList.toggle('show', visible===0);
-}
-search.addEventListener('input', runFilter);
-
-/* ---------- Source modal (citation exacte du livre) ---------- */
-const srcModal = document.getElementById('srcModal');
-const srcPage  = document.getElementById('srcPage');
-const srcBody  = document.getElementById('srcBody');
-
-function openSrc(key, isRepeat){
-  const s = SOURCES[key];
-  if(!s || !s.paras) return;
-  srcPage.textContent = s.page;
-  srcBody.innerHTML = (isRepeat ? `<div class="src-repeat-note">↑ אותו מקור שכבר הופיע למעלה</div>` : '')
-    + s.paras.map(p=>`<p>${p}</p>`).join('');
-  srcModal.classList.add('open');
-}
-function closeSrc(){ srcModal.classList.remove('open'); }
-
-/* clic sur une pastille 📖 (או ↑) → ouvre la source */
-document.addEventListener('click', e=>{
-  const badge = e.target.closest('.source[data-src]');
-  if(badge){ e.stopPropagation(); openSrc(badge.dataset.src, badge.classList.contains('repeat')); }
-});
-/* fermeture : × , clic sur le fond, ou Échap */
-document.getElementById('srcClose').addEventListener('click', closeSrc);
-srcModal.addEventListener('click', e=>{ if(e.target===srcModal) closeSrc(); });
-
-document.addEventListener('keydown', e=>{
-  if(e.key==='/' && document.activeElement!==search){ e.preventDefault(); openSearch(); }
-  if(e.key==='Escape'){ closeSrc(); search.value=''; runFilter(); closeSearch(); search.blur(); }
-});
-
-/* ---------- Active link on scroll ---------- */
-const links = [...document.querySelectorAll('#toc-list a')];
-const obs = new IntersectionObserver(es=>{
-  es.forEach(en=>{
-    if(en.isIntersecting){
-      links.forEach(l=>l.classList.toggle('active', l.dataset.target===en.target.id));
-    }
-  });
-},{rootMargin:'-20% 0px -70% 0px'});
-cards.forEach(c=>obs.observe(c));
-
-document.getElementById('updated').textContent =
-  new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
-</script>
-</body>
-</html>
+    li.innerHTML = `<a role="button" tabindex="0" data-target="${en
