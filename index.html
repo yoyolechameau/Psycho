@@ -159,6 +159,15 @@
     font-family:'Frank Ruhl Libre',serif;font-size:17.5px;line-height:1.65;color:var(--ink);font-weight:500;}
   .qstmt::before{content:"השאלה";display:block;font-family:'Heebo',sans-serif;font-weight:800;
     font-size:11px;letter-spacing:1px;color:var(--primary-dark);margin-bottom:5px;}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px 0 18px;
+    border:1px solid var(--line);border-radius:12px;}
+  table.cmp{border-collapse:collapse;width:100%;min-width:680px;font-family:'Assistant',sans-serif;font-size:14px;}
+  table.cmp th,table.cmp td{border:1px solid var(--line);padding:10px 12px;text-align:right;vertical-align:top;line-height:1.55;}
+  table.cmp thead th{background:var(--primary-soft);color:var(--primary-dark);
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:12.5px;white-space:nowrap;}
+  table.cmp td.rowhead{background:#fbf6ec;font-family:'Frank Ruhl Libre',serif;font-weight:700;
+    font-size:15px;white-space:nowrap;color:var(--primary-dark);}
+  table.cmp tbody tr:nth-child(even) td{background:rgba(47,109,99,.04);}
 
   /* definition highlight */
   .def{
@@ -380,6 +389,7 @@ function inline(t){
 function renderBlock(b){
   if(b.type==="p")        return `<p class="${b.lead?'lead':''}">${inline(b.text)}</p>`;
   if(b.type==="q")        return `<div class="qstmt">${inline(b.text)}</div>`;
+  if(b.type==="table")    return `<div class="tablewrap"><table class="cmp"><thead><tr>${b.headers.map(h=>`<th>${inline(h)}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' class="rowhead"':''}>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   if(b.type==="subtitle") return `<div class="subtitle">${inline(b.text)}</div>`;
   if(b.type==="def")      return `<div class="def"><span class="def-label">הגדרה</span>
       <div class="def-text">${inline(b.text)}${b.src?srcBadge(b.src):''}</div></div>`;
