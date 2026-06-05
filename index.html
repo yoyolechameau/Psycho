@@ -154,6 +154,11 @@
 
   .card-body p{margin:0 0 14px;}
   .lead{color:var(--ink-soft);font-weight:600;}
+  .qstmt{background:#eef4f3;border:1px solid var(--line);border-inline-start:4px solid var(--primary);
+    border-radius:11px;padding:13px 16px;margin:0 0 18px;
+    font-family:'Frank Ruhl Libre',serif;font-size:17.5px;line-height:1.65;color:var(--ink);font-weight:500;}
+  .qstmt::before{content:"השאלה";display:block;font-family:'Heebo',sans-serif;font-weight:800;
+    font-size:11px;letter-spacing:1px;color:var(--primary-dark);margin-bottom:5px;}
 
   /* definition highlight */
   .def{
@@ -374,6 +379,7 @@ function inline(t){
 
 function renderBlock(b){
   if(b.type==="p")        return `<p class="${b.lead?'lead':''}">${inline(b.text)}</p>`;
+  if(b.type==="q")        return `<div class="qstmt">${inline(b.text)}</div>`;
   if(b.type==="subtitle") return `<div class="subtitle">${inline(b.text)}</div>`;
   if(b.type==="def")      return `<div class="def"><span class="def-label">הגדרה</span>
       <div class="def-text">${inline(b.text)}${b.src?srcBadge(b.src):''}</div></div>`;
