@@ -298,8 +298,97 @@
     body{background:#fff;}
   }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<style>
+  /* ===== Mode examen (flashcards) ===== */
+  .exam-btn{position:fixed;top:16px;inset-inline-start:16px;z-index:60;
+    display:flex;align-items:center;gap:7px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:14px;
+    padding:11px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(47,109,99,.35);}
+  .exam-btn:hover{transform:translateY(-1px);}
+  .exam-btn .star{font-size:15px}
+  .exam-badge{background:var(--terracotta);color:#fff;border-radius:999px;
+    font-size:11px;font-weight:800;min-width:18px;height:18px;display:inline-flex;
+    align-items:center;justify-content:center;padding:0 5px}
+
+  .exam{position:fixed;inset:0;z-index:120;background:var(--bg);display:none;
+    flex-direction:column;}
+  .exam.open{display:flex}
+  .exam-top{display:flex;align-items:center;gap:12px;padding:14px 18px;
+    border-bottom:1px solid var(--line);background:var(--card)}
+  .exam-top h2{font-family:'Heebo',sans-serif;font-size:16px;font-weight:800;color:var(--primary-dark);margin:0;flex:1}
+  .exam-top .count{font-family:'Heebo',sans-serif;font-size:13px;color:var(--muted);font-weight:700}
+  .exam-icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:var(--ink)}
+  .exam-icon:hover{background:var(--primary-soft)}
+
+  .exam-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;
+    justify-content:flex-start;padding:22px 16px 30px}
+  .fcard{width:100%;max-width:640px;background:var(--card);border:1px solid var(--line);
+    border-radius:18px;box-shadow:0 8px 26px rgba(60,46,28,.08);overflow:hidden}
+  .fcard-sec{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;letter-spacing:.5px;
+    color:var(--primary);background:var(--primary-soft);padding:8px 16px;border-bottom:1px solid var(--line)}
+  .fcard-q{font-family:'Frank Ruhl Libre',serif;font-size:21px;line-height:1.6;color:var(--ink);
+    padding:22px 20px;font-weight:600}
+  .fcard-a{font-family:'Assistant',sans-serif;font-size:17px;line-height:1.75;color:var(--ink);
+    padding:0 20px 20px;border-top:1px dashed var(--line);margin-top:2px;display:none}
+  .fcard-a.show{display:block;padding-top:16px}
+  .fcard-a b{color:var(--primary-dark)}
+
+  .mcq-opts{display:flex;flex-direction:column;gap:9px;padding:4px 20px 20px}
+  .mcq-opt{display:flex;gap:10px;align-items:flex-start;text-align:start;cursor:pointer;
+    border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:12px 14px;
+    font-family:'Assistant',sans-serif;font-size:16px;line-height:1.5;color:var(--ink);width:100%}
+  .mcq-opt:hover{border-color:var(--primary)}
+  .mcq-opt .lett{font-family:'Heebo',sans-serif;font-weight:800;color:var(--primary);flex-shrink:0}
+  .mcq-opt.correct{background:#e7f4ec;border-color:#3f9b6e}
+  .mcq-opt.correct .lett{color:#2e7d52}
+  .mcq-opt.wrong{background:#fbe9e7;border-color:var(--terracotta)}
+  .mcq-opt.wrong .lett{color:var(--terracotta)}
+  .mcq-opt[disabled]{cursor:default}
+
+  .reveal-btn{display:block;width:calc(100% - 40px);margin:0 20px 20px;border:none;cursor:pointer;
+    background:var(--primary);color:#fff;font-family:'Heebo',sans-serif;font-weight:800;font-size:16px;
+    padding:14px;border-radius:12px}
+  .reveal-btn:hover{background:var(--primary-dark)}
+
+  .rate{width:100%;max-width:640px;margin-top:16px;display:none;grid-template-columns:repeat(4,1fr);gap:8px}
+  .rate.show{display:grid}
+  .rate button{border:none;cursor:pointer;border-radius:12px;padding:13px 6px;color:#fff;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:14px;display:flex;flex-direction:column;gap:3px;align-items:center}
+  .rate button small{font-weight:600;font-size:11px;opacity:.9}
+  .r-again{background:#d9534f}.r-hard{background:#e08a3c}.r-good{background:#3f9b6e}.r-easy{background:#2f6d63}
+  .rate button:hover{filter:brightness(1.07)}
+
+  .exam-empty{text-align:center;max-width:460px;margin:auto;padding:30px}
+  .exam-empty .big{font-family:'Frank Ruhl Libre',serif;font-size:26px;color:var(--primary-dark);margin-bottom:10px}
+  .exam-empty p{color:var(--muted);font-size:15px;line-height:1.7;margin-bottom:18px}
+  .exam-empty button{border:none;cursor:pointer;background:var(--primary);color:#fff;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:15px;padding:12px 22px;border-radius:12px}
+
+  .exam-settings{position:absolute;inset:0;background:var(--bg);z-index:5;display:none;
+    flex-direction:column;padding:0}
+  .exam-settings.open{display:flex}
+  .set-body{flex:1;overflow-y:auto;padding:22px 18px;max-width:640px;margin:0 auto;width:100%}
+  .set-body h3{font-family:'Heebo',sans-serif;color:var(--primary-dark);font-size:15px;margin:18px 0 8px}
+  .set-body p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 8px}
+  .set-body input,.set-body textarea{width:100%;border:1px solid var(--line);border-radius:10px;
+    padding:11px;font-family:'Assistant';font-size:15px;background:var(--card);color:var(--ink)}
+  .set-body textarea{height:90px;resize:vertical;font-family:monospace;font-size:12px;direction:ltr}
+  .set-btn{border:none;cursor:pointer;background:var(--primary);color:#fff;font-family:'Heebo';
+    font-weight:800;font-size:14px;padding:10px 16px;border-radius:10px;margin-top:8px}
+  .set-btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .set-btn.danger{background:#d9534f}
+  .sync-state{font-size:12.5px;font-weight:700;margin-top:6px}
+  .sync-on{color:#2e7d52}.sync-off{color:var(--muted)}
+</style>
 </head>
 <body>
+
+<button class="exam-btn" id="examBtn"><span class="star">✦</span> מצב מבחן <span class="exam-badge" id="examBadge" style="display:none">0</span></button>
 
 <button class="fab-search" id="fabSearch" aria-label="חיפוש" title="חיפוש (/)">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -350,6 +439,52 @@
     <div class="src-foot">הציטוט המדויק מתוך ספר הקורס · לחצו על × או מחוץ לחלון לסגירה</div>
   </div>
 </div>
+
+<div class="exam" id="exam" role="dialog" aria-modal="true">
+  <div class="exam-top">
+    <button class="exam-icon" id="examClose" aria-label="סגירה">×</button>
+    <h2>מצב מבחן — כרטיסיות</h2>
+    <span class="count" id="examCount"></span>
+    <button class="exam-icon" id="examSet" aria-label="הגדרות">⚙</button>
+  </div>
+  <div class="exam-body" id="examArea"></div>
+
+  <div class="exam-settings" id="examSettings">
+    <div class="exam-top">
+      <button class="exam-icon" id="setBack" aria-label="חזרה">→</button>
+      <h2>הגדרות וסנכרון</h2>
+    </div>
+    <div class="set-body">
+      <h3>קוד סנכרון (בין מכשירים)</h3>
+      <p>הזינו את <b>אותו קוד</b> בטלפון ובמחשב כדי שההתקדמות תסונכרן ביניהם. בחרו קוד אישי (למשל מילה + מספר).</p>
+      <input id="syncInput" type="text" placeholder="לדוגמה: francois2026" autocomplete="off">
+      <button class="set-btn" id="syncSave">שמירה והפעלת סנכרון</button>
+      <div class="sync-state sync-off" id="syncState">סנכרון כבוי</div>
+
+      <h3>גיבוי ידני</h3>
+      <p>אם תעדיפו בלי סנכרון אוטומטי: ייצאו את ההתקדמות וייבאו אותה במכשיר השני.</p>
+      <button class="set-btn ghost" id="btnExport">ייצוא התקדמות (העתקה)</button>
+      <textarea id="ioBox" placeholder="כאן יופיע קוד הגיבוי, או הדביקו כאן קוד לייבוא…"></textarea>
+      <button class="set-btn ghost" id="btnImport">ייבוא מהקוד שלמעלה</button>
+
+      <h3>איפוס</h3>
+      <p>מחיקת כל ההתקדמות במכשיר זה.</p>
+      <button class="set-btn danger" id="btnReset">איפוס ההתקדמות</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== config Firebase ===== */
+var firebaseConfig = {
+  apiKey: "AIzaSyAJrKMesAqOnTpBbzTaDyfrGUNVRadN_3Y",
+  authDomain: "psycho-62fa6.firebaseapp.com",
+  projectId: "psycho-62fa6",
+  storageBucket: "psycho-62fa6.firebasestorage.app",
+  messagingSenderId: "1077173021703",
+  appId: "1:1077173021703:web:e207a1a941d3ec9089cea2"
+};
+</script>
 
 <script>
 /* Charge data.js avec anti-cache, puis lance l'app SEULEMENT quand les données sont prêtes */
@@ -559,6 +694,216 @@ document.getElementById('updated').textContent =
 }
 /* lance tout : charge data.js (anti-cache) puis affiche */
 bootData(initApp);
+
+/* ===== Mode examen (flashcards + répétition espacée + sync Firebase) ===== */
+(function loadCards(){
+  var s=document.createElement('script');
+  s.src='cards.js?t='+Date.now();
+  s.onload=initExam;
+  s.onerror=function(){ console.warn('cards.js לא נטען'); };
+  document.head.appendChild(s);
+})();
+
+function initExam(){
+  if(typeof CARDS==='undefined'||!CARDS.length) return;
+  var DAY=86400000, now=function(){return Date.now();};
+  var LS_PROG='psycho_prog', LS_SYNC='psycho_sync';
+
+  /* ---- Firebase (optionnel) ---- */
+  var db=null, syncCode=localStorage.getItem(LS_SYNC)||'';
+  try{
+    if(typeof firebase!=='undefined'&&firebase.initializeApp){
+      if(!firebase.apps||!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db=firebase.firestore();
+    }
+  }catch(e){ console.warn('Firebase indisponible',e); db=null; }
+
+  /* ---- État de progression ---- */
+  var state={updatedAt:0,cards:{}};
+  try{ var raw=localStorage.getItem(LS_PROG); if(raw) state=JSON.parse(raw); }catch(e){}
+  if(!state.cards) state.cards={};
+
+  function persistLocal(){ state.updatedAt=now(); try{localStorage.setItem(LS_PROG,JSON.stringify(state));}catch(e){} }
+  var saveTimer=null;
+  function saveCloud(){
+    if(!db||!syncCode) return;
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){
+      db.collection('progress').doc(syncCode).set(state).catch(function(e){console.warn('write fail',e);});
+    },1200);
+  }
+  function save(){ persistLocal(); saveCloud(); updateBadge(); }
+
+  function pullCloud(cb){
+    if(!db||!syncCode){ cb&&cb(); return; }
+    db.collection('progress').doc(syncCode).get().then(function(doc){
+      if(doc.exists){
+        var remote=doc.data();
+        if(remote&&(remote.updatedAt||0)>(state.updatedAt||0)){ state=remote; if(!state.cards)state.cards={}; persistLocal(); }
+        else { saveCloud(); }
+      } else { saveCloud(); }
+      cb&&cb();
+    }).catch(function(e){ console.warn('read fail',e); cb&&cb(); });
+  }
+
+  /* ---- Algorithme (SM-2 allégé) ---- */
+  function dueOf(id){ var c=state.cards[id]; return c?(c.due||0):0; } /* 0 = nouvelle / à réviser */
+  function isDue(id){ return dueOf(id)<=now(); }
+  function rate(id,q){
+    var c=state.cards[id]||{ease:2.5,interval:0,reps:0,lapses:0};
+    var e=c.ease||2.5, iv=c.interval||0;
+    if(q==='again'){ c.reps=0; iv=0; e=Math.max(1.3,e-0.2); c.lapses=(c.lapses||0)+1; }
+    else if(q==='hard'){ iv=iv<=0?1:Math.max(1,Math.round(iv*1.2)); e=Math.max(1.3,e-0.15); c.reps=(c.reps||0)+1; }
+    else if(q==='good'){ iv=iv<=0?1:Math.round(iv*e); c.reps=(c.reps||0)+1; }
+    else if(q==='easy'){ iv=iv<=0?3:Math.round(iv*e*1.3); e=e+0.15; c.reps=(c.reps||0)+1; }
+    c.ease=e; c.interval=iv;
+    c.due = (q==='again') ? now() : now()+iv*DAY;
+    state.cards[id]=c;
+    save();
+    return iv;
+  }
+
+  /* ---- File de session ---- */
+  var queue=[], current=null, studyAll=false;
+  function buildQueue(){
+    var ids=CARDS.map(function(c){return c.id;});
+    if(!studyAll) ids=ids.filter(isDue);
+    for(var i=ids.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=ids[i];ids[i]=ids[j];ids[j]=t;}
+    /* les plus difficiles d'abord (ease bas / lapses haut) */
+    ids.sort(function(a,b){
+      var ca=state.cards[a],cb=state.cards[b];
+      var sa=(ca?ca.ease:2.5)-((ca&&ca.lapses)||0)*0.3;
+      var sb=(cb?cb.ease:2.5)-((cb&&cb.lapses)||0)*0.3;
+      return sa-sb;
+    });
+    queue=ids;
+  }
+  function dueCount(){ return CARDS.filter(function(c){return isDue(c.id);}).length; }
+
+  /* ---- UI ---- */
+  var area=document.getElementById('examArea');
+  var countEl=document.getElementById('examCount');
+  var letters=['א','ב','ג','ד','ה'];
+  function esc(){ return; }
+
+  function next(){
+    if(!queue.length){ render(); return; }
+    var id=queue.shift();
+    current=CARDS.filter(function(c){return c.id===id;})[0];
+    render();
+  }
+
+  function render(){
+    countEl.textContent = studyAll ? ('נותרו '+queue.length) : ('לחזרה: '+dueCount());
+    if(!current && !queue.length){ renderEmpty(); return; }
+    if(!current){ next(); return; }
+    var c=current;
+    var h='<div class="fcard"><div class="fcard-sec">'+c.sec+'</div>'+
+          '<div class="fcard-q">'+c.q+'</div>';
+    if(c.type==='mcq'){
+      h+='<div class="mcq-opts" id="mcqOpts">';
+      c.options.forEach(function(op,i){
+        h+='<button class="mcq-opt" data-i="'+i+'"><span class="lett">'+letters[i]+'.</span><span>'+op+'</span></button>';
+      });
+      h+='</div></div>';
+    } else {
+      h+='<div class="fcard-a" id="fcardA">'+c.a+'</div></div>'+
+         '<button class="reveal-btn" id="revealBtn">הצג תשובה</button>';
+    }
+    h+='<div class="rate" id="rate">'+
+       '<button class="r-again" data-q="again">שוב<small>נכשלתי</small></button>'+
+       '<button class="r-hard" data-q="hard">קשה<small>בקושי</small></button>'+
+       '<button class="r-good" data-q="good">טוב<small>ידעתי</small></button>'+
+       '<button class="r-easy" data-q="easy">קל<small>בקלות</small></button></div>';
+    area.innerHTML=h;
+
+    if(c.type==='mcq'){
+      var opts=area.querySelectorAll('.mcq-opt');
+      opts.forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var i=+btn.getAttribute('data-i');
+          opts.forEach(function(b){b.setAttribute('disabled','');});
+          opts[c.correct].classList.add('correct');
+          if(i!==c.correct) btn.classList.add('wrong');
+          document.getElementById('rate').classList.add('show');
+        });
+      });
+    } else {
+      document.getElementById('revealBtn').addEventListener('click',function(){
+        document.getElementById('fcardA').classList.add('show');
+        this.style.display='none';
+        document.getElementById('rate').classList.add('show');
+      });
+    }
+    area.querySelectorAll('.rate button').forEach(function(b){
+      b.addEventListener('click',function(){
+        rate(current.id,b.getAttribute('data-q'));
+        current=null; next();
+      });
+    });
+  }
+
+  function renderEmpty(){
+    var n=dueCount();
+    area.innerHTML='<div class="exam-empty"><div class="big">כל הכבוד! 🎉</div>'+
+      '<p>'+(n?('יש '+n+' כרטיסים לחזרה.'):'אין כרגע כרטיסים לחזרה. חזרו מאוחר יותר, או תרגלו את כל הכרטיסים עכשיו.')+'</p>'+
+      '<button id="studyAllBtn">'+(n?'התחלת חזרה':'תרגול כל הכרטיסים')+'</button></div>';
+    document.getElementById('studyAllBtn').addEventListener('click',function(){
+      if(!n){ studyAll=true; } else { studyAll=false; }
+      startSession();
+    });
+  }
+
+  function startSession(){ buildQueue(); current=null; next(); }
+
+  function updateBadge(){
+    var b=document.getElementById('examBadge'); if(!b) return;
+    var n=dueCount();
+    if(n>0){ b.style.display='inline-flex'; b.textContent=n>99?'99+':n; }
+    else b.style.display='none';
+  }
+
+  /* ---- Ouvrture / fermeture ---- */
+  var exam=document.getElementById('exam');
+  function openExam(){
+    exam.classList.add('open');
+    pullCloud(function(){ updateBadge(); studyAll=false; if(dueCount()===0){renderEmpty();} else {startSession();} });
+  }
+  function closeExam(){ exam.classList.remove('open'); }
+  document.getElementById('examBtn').addEventListener('click',openExam);
+  document.getElementById('examClose').addEventListener('click',closeExam);
+
+  /* ---- Réglages ---- */
+  var setPanel=document.getElementById('examSettings');
+  var syncInput=document.getElementById('syncInput');
+  var syncState=document.getElementById('syncState');
+  function refreshSyncState(){
+    if(syncCode){ syncState.textContent='סנכרון פעיל · קוד: '+syncCode+(db?'':' (אופליין)'); syncState.className='sync-state sync-on'; }
+    else { syncState.textContent='סנכרון כבוי'; syncState.className='sync-state sync-off'; }
+  }
+  document.getElementById('examSet').addEventListener('click',function(){ syncInput.value=syncCode; refreshSyncState(); setPanel.classList.add('open'); });
+  document.getElementById('setBack').addEventListener('click',function(){ setPanel.classList.remove('open'); updateBadge(); if(exam.classList.contains('open')){ if(dueCount()===0)renderEmpty(); else startSession(); } });
+  document.getElementById('syncSave').addEventListener('click',function(){
+    syncCode=(syncInput.value||'').trim().replace(/[^A-Za-z0-9_\-]/g,'');
+    localStorage.setItem(LS_SYNC,syncCode);
+    refreshSyncState();
+    pullCloud(function(){ refreshSyncState(); updateBadge(); });
+  });
+  document.getElementById('btnExport').addEventListener('click',function(){
+    var box=document.getElementById('ioBox'); box.value=JSON.stringify(state);
+    box.select(); try{document.execCommand('copy');}catch(e){}
+  });
+  document.getElementById('btnImport').addEventListener('click',function(){
+    try{ var o=JSON.parse(document.getElementById('ioBox').value); if(o&&o.cards){ state=o; persistLocal(); saveCloud(); updateBadge(); alert('יובא בהצלחה ✓'); } }
+    catch(e){ alert('קוד לא תקין'); }
+  });
+  document.getElementById('btnReset').addEventListener('click',function(){
+    if(confirm('לאפס את כל ההתקדמות?')){ state={updatedAt:now(),cards:{}}; persistLocal(); saveCloud(); updateBadge(); }
+  });
+
+  /* badge initial */
+  if(syncCode) pullCloud(updateBadge); else updateBadge();
+}
 </script>
 </body>
 </html>
