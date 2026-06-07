@@ -107,22 +107,23 @@
   .toc-title{font-size:12.5px; font-weight:800; letter-spacing:1px;
     color:var(--ink-soft); text-transform:uppercase; margin:0 4px 12px;}
   .toc ul{list-style:none;margin:0;padding:0;}
+  .toc-group{margin-bottom:10px;}
+  .toc-grouphead{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;
+    color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    padding:10px 13px;border-radius:10px;}
+  .toc-grouphead .toc-chev{width:16px;height:16px;transition:transform .2s;flex-shrink:0;}
+  .toc-group.collapsed .toc-chev{transform:rotate(-90deg);}
+  .toc-parts{display:block;margin:5px 6px 0;border-inline-start:2px solid var(--line);padding-inline-start:8px;}
+  .toc-group.collapsed .toc-parts{display:none;}
   .toc .toc-chap{
     display:block; text-decoration:none; cursor:pointer;
-    font-family:'Frank Ruhl Libre',serif; font-weight:700; font-size:15.5px;
-    color:var(--primary-dark); margin:4px 0; padding:11px 13px; border-radius:10px;
+    font-family:'Frank Ruhl Libre',serif; font-weight:600; font-size:14.5px;
+    color:var(--ink-soft); margin:3px 0; padding:9px 11px; border-radius:9px;
     border-inline-start:3px solid transparent; transition:.15s;
   }
-  .toc .toc-chap:hover{background:var(--paper-2);}
-  .toc .toc-chap.active{background:var(--primary-soft);border-inline-start-color:var(--primary);}
-  .toc a{
-    display:block; text-decoration:none; color:var(--ink-soft);
-    font-weight:600; font-size:14.5px; padding:7px 12px; border-radius:9px;
-    border-inline-start:3px solid transparent; transition:.15s; cursor:pointer;
-  }
-  .toc a:hover{background:var(--paper-2);color:var(--ink);}
-  .toc a.active{background:var(--primary-soft);color:var(--primary-dark);
-    border-inline-start-color:var(--primary);}
+  .toc .toc-chap:hover{background:var(--paper-2);color:var(--ink);}
+  .toc .toc-chap.active{background:var(--primary-soft);color:var(--primary-dark);font-weight:700;border-inline-start-color:var(--primary);}
 
   /* ---------- Cards ---------- */
   .stream{display:flex;flex-direction:column;gap:26px;min-width:0;}
@@ -316,10 +317,11 @@
     font-size:11px;font-weight:800;min-width:18px;height:18px;display:inline-flex;
     align-items:center;justify-content:center;padding:0 5px}
 
-  .exam{position:fixed;inset:0;z-index:120;background:var(--paper);display:none;
-    flex-direction:column;}
+  body.exam-open{overflow:hidden;}
+  .exam{position:fixed;inset:0;height:100dvh;z-index:200;background:var(--paper);display:none;
+    flex-direction:column;overscroll-behavior:contain;-webkit-tap-highlight-color:transparent;}
   .exam.open{display:flex}
-  .exam-top{display:flex;align-items:center;gap:12px;padding:14px 18px;
+  .exam-top{display:flex;align-items:center;gap:12px;padding:14px 18px;flex-shrink:0;
     border-bottom:1px solid var(--line);background:var(--paper-2)}
   .exam-top h2{font-family:'Heebo',sans-serif;font-size:16px;font-weight:800;color:var(--primary-dark);margin:0;flex:1}
   .exam-top .count{font-family:'Heebo',sans-serif;font-size:13px;color:var(--ink-soft);font-weight:700}
@@ -328,8 +330,8 @@
     font-size:18px;color:var(--ink)}
   .exam-icon:hover{background:var(--primary-soft)}
 
-  .exam-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;
-    justify-content:flex-start;padding:22px 16px 30px}
+  .exam-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:22px 16px 40px}
   .fcard{width:100%;max-width:640px;background:var(--paper-2);border:1px solid var(--line);
     border-radius:18px;box-shadow:0 8px 26px rgba(60,46,28,.08);overflow:hidden}
   .fcard-sec{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;letter-spacing:.5px;
@@ -588,6 +590,7 @@ function searchText(entry){
   return s.replace(/\[\[[^\]]+\]\]/g,' ').replace(/<\/?[^>]+>/g,'').toLowerCase();
 }
 
+let __curChapNum=null, __curParts=null;
 DATA.chapters.forEach(ch=>{
   const head = document.createElement('div');
   head.className = 'chap-head';
@@ -596,7 +599,22 @@ DATA.chapters.forEach(ch=>{
   head.dataset.chap = ch.id;
   stream.appendChild(head);
 
-  /* Sommaire : une seule ligne cliquable par partie */
+  /* Sommaire groupé par chapitre (repliable) */
+  if(ch.num !== __curChapNum){
+    __curChapNum = ch.num;
+    const group = document.createElement('li');
+    group.className = 'toc-group';
+    group.dataset.chapNum = ch.num;
+    const gh = document.createElement('div');
+    gh.className = 'toc-grouphead';
+    gh.innerHTML = `<span>${ch.num}</span><svg class="toc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>`;
+    gh.addEventListener('click', ()=> group.classList.toggle('collapsed'));
+    group.appendChild(gh);
+    __curParts = document.createElement('div');
+    __curParts.className = 'toc-parts';
+    group.appendChild(__curParts);
+    tocList.appendChild(group);
+  }
   const tChap = document.createElement('a');
   tChap.className = 'toc-chap';
   tChap.setAttribute('role','button');
@@ -604,7 +622,7 @@ DATA.chapters.forEach(ch=>{
   tChap.dataset.target = 'head-'+ch.id;
   tChap.dataset.chap = ch.id;
   tChap.textContent = ch.title;
-  tocList.appendChild(tChap);
+  __curParts.appendChild(tChap);
 
   ch.entries.forEach(en=>{
     const card = document.createElement('article');
@@ -681,6 +699,10 @@ function runFilter(){
     const c = document.getElementById(a.dataset.target);
     a.classList.toggle('hidden', !!(c && c.classList.contains('hidden')));
   });
+  document.querySelectorAll('#toc-list .toc-group').forEach(g=>{
+    const anyVisible = [...g.querySelectorAll('.toc-chap')].some(a=>!a.classList.contains('hidden'));
+    g.classList.toggle('hidden', !anyVisible);
+  });
   noResults.classList.toggle('show', visible===0);
 }
 search.addEventListener('input', runFilter);
@@ -739,12 +761,13 @@ var __examOpen=null, __examReady=false, __examError='';
   var examEl=document.getElementById('exam');
   function tryOpen(){
     examEl.classList.add('open');
+    document.body.classList.add('exam-open');
     if(__examReady && __examOpen){ __examOpen(); }
     else if(__examError){ showExamError(__examError); }
     else { var a=document.getElementById('examArea'); if(a) a.innerHTML='<div class="exam-empty"><div class="big">טוען…</div><p>רגע, טוענים את הכרטיסים…</p></div>'; }
   }
   var btn=document.getElementById('examBtn'); if(btn) btn.addEventListener('click',tryOpen);
-  var cl=document.getElementById('examClose'); if(cl) cl.addEventListener('click',function(){examEl.classList.remove('open');});
+  var cl=document.getElementById('examClose'); if(cl) cl.addEventListener('click',function(){examEl.classList.remove('open');document.body.classList.remove('exam-open');});
 })();
 function showExamError(msg){
   __examError=msg;
@@ -1032,9 +1055,10 @@ function initExam(){
   var exam=document.getElementById('exam');
   function openExam(){
     exam.classList.add('open');
+    document.body.classList.add('exam-open');
     pullCloud(function(){ updateBadge(); studyAll=false; if(dueCount()===0){renderEmpty();} else {startSession();} });
   }
-  function closeExam(){ exam.classList.remove('open'); }
+  function closeExam(){ exam.classList.remove('open'); document.body.classList.remove('exam-open'); }
   /* le bouton est déjà câblé plus haut : on expose openExam et on ouvre si déjà demandé */
   __examOpen=openExam; __examReady=true;
   if(exam.classList.contains('open')) openExam();
