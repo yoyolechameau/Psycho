@@ -335,6 +335,11 @@
   .exam-body>*{flex-shrink:0;}
   .fcard{width:100%;max-width:640px;background:var(--paper-2);border:1px solid var(--line);
     border-radius:18px;box-shadow:0 8px 26px rgba(60,46,28,.08);overflow:hidden}
+  .fcard.imp{border:2.5px solid var(--accent);box-shadow:0 8px 30px rgba(194,86,47,.28);
+    background:linear-gradient(180deg,#fff7f2,var(--paper-2) 70px);}
+  .fcard.imp .fcard-sec{color:#fff;background:linear-gradient(135deg,var(--accent),#a8431f);border-bottom-color:var(--accent);}
+  .imp-flag{font-family:'Heebo',sans-serif;font-size:12px;font-weight:800;color:var(--accent);
+    background:var(--accent-soft);padding:6px 16px;border-bottom:1px solid #f0cdbc;}
   .fcard-sec{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;letter-spacing:.5px;
     color:var(--primary);background:var(--primary-soft);padding:8px 16px;border-bottom:1px solid var(--line)}
   .fcard-q{font-family:'Frank Ruhl Libre',serif;font-size:21px;line-height:1.6;color:var(--ink);
@@ -900,7 +905,9 @@ function initExam(){
     if(!current && !queue.length){ renderEmpty(); return; }
     if(!current){ next(); return; }
     var c=current;
-    var h='<div class="fcard"><div class="fcard-sec">'+c.sec+'</div>'+
+    var h='<div class="fcard'+(c.imp?' imp':'')+'">'+
+          '<div class="fcard-sec">'+(c.imp?'⭐ ':'')+c.sec+'</div>'+
+          (c.imp?'<div class="imp-flag">שאלה של המרצה — חשוב מאוד!</div>':'')+
           '<div class="fcard-q">'+c.q+'</div>';
     if(c.type==='mcq'){
       h+='<div class="mcq-opts" id="mcqOpts">';
