@@ -578,7 +578,14 @@ var firebaseConfig = {
 function bootData(cb){
   var s = document.createElement('script');
   s.src = 'data.js?t=' + Date.now();
-  s.onload = cb;
+  s.onload = function(){
+    try{ cb(); }
+    catch(e){
+      console.error(e);
+      var el = document.getElementById('stream');
+      if(el) el.innerHTML = '<p style="padding:40px;text-align:center;color:#b33;direction:ltr;font-family:monospace;font-size:13px;white-space:pre-wrap">שגיאת JS באתחול (initApp):\n'+(e && e.stack || e)+'</p>';
+    }
+  };
   s.onerror = function(){
     var el = document.getElementById('stream');
     if(el) el.innerHTML = '<p style="padding:40px;text-align:center;color:#5d564b">שגיאה בטעינת התוכן (data.js). בדקו את החיבור ונסו לרענן.</p>';
@@ -788,15 +795,17 @@ document.addEventListener('keydown', e=>{
 
 /* ---------- Active link on scroll (surligne la partie courante) ---------- */
 const links = [...document.querySelectorAll('#toc-list .toc-chap')];
-const obs = new IntersectionObserver(es=>{
-  es.forEach(en=>{
-    if(en.isIntersecting){
-      const chap = en.target.dataset.chap;
-      links.forEach(l=>l.classList.toggle('active', l.dataset.chap===chap));
-    }
-  });
-},{rootMargin:'-20% 0px -70% 0px'});
-cards.forEach(c=>obs.observe(c));
+if(typeof IntersectionObserver !== 'undefined'){
+  const obs = new IntersectionObserver(es=>{
+    es.forEach(en=>{
+      if(en.isIntersecting){
+        const chap = en.target.dataset.chap;
+        links.forEach(l=>l.classList.toggle('active', l.dataset.chap===chap));
+      }
+    });
+  },{rootMargin:'-20% 0px -70% 0px'});
+  cards.forEach(c=>obs.observe(c));
+}
 
 document.getElementById('updated').textContent =
   new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
@@ -843,7 +852,11 @@ function showExamError(msg){
 })();
 
 function initExam(){
-  if(typeof CARDS==='undefined'||!CARDS.length) return;
+  if(typeof CARDS==='undefined'||!CARDS.length){
+    showExamError('CARDS לא נטען כראוי (typeof='+typeof CARDS+', length='+(typeof CARDS!=='undefined'?CARDS.length:'-')+'). ודאו שהקובץ cards.js תקין וזהה לזה שנשלח.');
+    return;
+  }
+  try{
   var DAY=86400000, HOUR=3600000, now=function(){return Date.now();};
   var LS_PROG='psycho_prog', LS_SYNC='psycho_sync';
   /* ---- Mode דחיסה למבחן (36h) : עדיפות לשאלות תרגול/QCM ---- */
@@ -1217,6 +1230,11 @@ function initExam(){
 
   /* badge initial */
   if(syncCode) pullCloud(updateBadge); else updateBadge();
+  __examReady = true;
+  }catch(e){
+    console.error(e);
+    showExamError('שגיאת JS במצב מבחן (initExam):\n'+(e && e.stack || e));
+  }
 }
 </script>
 </body>
