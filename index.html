@@ -335,13 +335,17 @@
   .exam-body>*{flex-shrink:0;}
   .fcard{width:100%;max-width:640px;background:var(--paper-2);border:1px solid var(--line);
     border-radius:18px;box-shadow:0 8px 26px rgba(60,46,28,.08);overflow:hidden}
-  .fcard.imp{border:3px solid #efa12a;background:#fffaf0;
+  .fcard.tier-quiz{border:3px solid #efa12a;background:#fffaf0;
     box-shadow:0 12px 36px rgba(239,150,30,.38);}
+  .fcard.tier-lecture{border:3px solid #3f9b6e;background:#f5fbf8;
+    box-shadow:0 12px 36px rgba(63,155,110,.26);}
   .imp-banner{font-family:'Heebo',sans-serif;font-weight:900;font-size:15px;letter-spacing:.4px;
-    color:#5c3408;text-align:center;padding:13px 14px;
-    background:linear-gradient(135deg,#ffd24a,#f4a52a);border-bottom:2px solid #e0901c;
-    text-shadow:0 1px 0 rgba(255,255,255,.35);}
-  .imp-stars{color:#a8431f;font-size:16px;}
+    text-align:center;padding:13px 14px;text-shadow:0 1px 0 rgba(255,255,255,.35);}
+  .imp-banner.quiz-banner{color:#5c3408;
+    background:linear-gradient(135deg,#ffd24a,#f4a52a);border-bottom:2px solid #e0901c;}
+  .imp-banner.lecture-banner{color:#0f3d33;
+    background:linear-gradient(135deg,#bfe6d6,#8fcdb6);border-bottom:2px solid #3f9b6e;}
+  .imp-stars{font-size:16px;}
   .fcard-sec{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;letter-spacing:.5px;
     color:var(--primary);background:var(--primary-soft);padding:8px 16px;border-bottom:1px solid var(--line)}
   .fcard-q{font-family:'Frank Ruhl Libre',serif;font-size:21px;line-height:1.6;color:var(--ink);
@@ -352,6 +356,32 @@
   .fcard-a.show #ansView::before{content:"תשובה";display:block;font-family:'Heebo',sans-serif;
     font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--primary);margin-bottom:9px;}
   .fcard-a b{color:var(--primary-dark)}
+
+  /* ---------- Bouton "הסבר מורחב" + popup ---------- */
+  .explain-btn{display:inline-flex;align-items:center;gap:6px;margin:0 20px 14px;
+    border:1.5px solid var(--primary);background:var(--primary-soft);color:var(--primary-dark);
+    cursor:pointer;font-family:'Heebo',sans-serif;font-weight:800;font-size:13.5px;
+    padding:8px 14px;border-radius:20px;transition:.15s;}
+  .explain-btn:hover{background:var(--primary);color:#fff;}
+  .explain-btn .bulb{font-size:15px;}
+  .explain-modal{position:fixed;inset:0;z-index:260;display:none;align-items:center;justify-content:center;
+    background:rgba(30,25,18,.55);backdrop-filter:blur(3px);padding:22px;}
+  .explain-modal.open{display:flex;animation:fadeIn .15s ease;}
+  .explain-box{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;
+    max-width:600px;width:100%;max-height:82vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.32);
+    animation:popIn .18s ease;}
+  .explain-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:15px 20px;background:linear-gradient(180deg,#fffefb,#fbf6ec);
+    border-bottom:1px solid var(--line);}
+  .explain-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:17px;color:var(--primary-dark);
+    display:flex;align-items:center;gap:8px;}
+  .explain-title::before{content:"💡";}
+  .explain-close{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;cursor:pointer;
+    font-size:22px;line-height:1;background:var(--paper);color:var(--ink-soft);flex:none;transition:.15s;}
+  .explain-close:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .explain-content{padding:20px 24px;font-family:'Assistant',sans-serif;font-size:16px;line-height:1.85;color:var(--ink);
+    white-space:pre-line;}
+  .explain-content b{color:var(--primary-dark);}
 
   .mcq-opts{display:flex;flex-direction:column;gap:9px;padding:4px 20px 20px}
   .mcq-opt{display:flex;gap:10px;align-items:flex-start;text-align:start;cursor:pointer;
@@ -484,6 +514,16 @@
     </div>
     <div class="src-quote" id="srcBody"></div>
     <div class="src-foot">הציטוט המדויק מתוך ספר הקורס · לחצו על × או מחוץ לחלון לסגירה</div>
+  </div>
+</div>
+
+<div class="explain-modal" id="explainModal" role="dialog" aria-modal="true">
+  <div class="explain-box" id="explainBox">
+    <div class="explain-head">
+      <span class="explain-title">הסבר מורחב</span>
+      <button class="explain-close" id="explainClose" aria-label="סגירה">×</button>
+    </div>
+    <div class="explain-content" id="explainContent"></div>
   </div>
 </div>
 
@@ -779,6 +819,16 @@ var __examOpen=null, __examReady=false, __examError='';
   var btn=document.getElementById('examBtn'); if(btn) btn.addEventListener('click',tryOpen);
   var cl=document.getElementById('examClose'); if(cl) cl.addEventListener('click',function(){examEl.classList.remove('open');document.body.classList.remove('exam-open');});
 })();
+
+/* ---------- Modal "הסבר מורחב" (popup, fonctionne dans tous les modes) ---------- */
+(function wireExplainModal(){
+  var m=document.getElementById('explainModal');
+  if(!m) return;
+  function closeExplain(){ m.classList.remove('open'); }
+  var cl=document.getElementById('explainClose'); if(cl) cl.addEventListener('click',closeExplain);
+  m.addEventListener('click',function(e){ if(e.target===m) closeExplain(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeExplain(); });
+})();
 function showExamError(msg){
   __examError=msg;
   var a=document.getElementById('examArea');
@@ -794,8 +844,11 @@ function showExamError(msg){
 
 function initExam(){
   if(typeof CARDS==='undefined'||!CARDS.length) return;
-  var DAY=86400000, now=function(){return Date.now();};
+  var DAY=86400000, HOUR=3600000, now=function(){return Date.now();};
   var LS_PROG='psycho_prog', LS_SYNC='psycho_sync';
+  /* ---- Mode דחיסה למבחן (36h) : עדיפות לשאלות תרגול/QCM ---- */
+  var cardById={}; CARDS.forEach(function(c){cardById[c.id]=c;});
+  function tierOf(c){ return (c&&c.sec&&c.sec.indexOf('תרגול')>-1) ? 0 : 1; } /* 0=תרגול (עדיפות עליונה), 1=הרצאה */
 
   /* ---- Firebase (optionnel) ---- */
   var db=null, syncCode=localStorage.getItem(LS_SYNC)||'';
@@ -834,21 +887,32 @@ function initExam(){
     }).catch(function(e){ console.warn('read fail',e); cb&&cb(); });
   }
 
-  /* ---- Algorithme (SM-2 allégé) ---- */
-  function dueOf(id){ var c=state.cards[id]; return c?(c.due||0):0; } /* 0 = nouvelle / à réviser */
+  /* ---- Algoritm (SM-2 מותאם לדחיסה של 36 שעות, לא ימים) ----
+     יחידת הזמן היא שעה, לא יום. שאלות "תרגול" (QCM/מבחנים אמיתיים) מוגבלות
+     לתקרה נמוכה יותר (10ש') כדי לחזור שוב ושוב לפני המבחן; שאלות "הרצאה"
+     מוגבלות ל-20ש'. כך כל כרטיסייה חוזרת לפחות פעם-פעמיים נוספות תוך 36 השעות. */
+  function dueOf(id){ var c=state.cards[id]; return c?(c.due||0):0; } /* 0 = נעדר/חדש */
   function isDue(id){ return dueOf(id)<=now(); }
   function rate(id,q){
     var c=state.cards[id]||{ease:2.5,interval:0,reps:0,lapses:0};
-    var e=c.ease||2.5, iv=c.interval||0;
+    var e=c.ease||2.5, iv=c.interval||0; /* iv בשעות */
+    var tier=tierOf(cardById[id]);
+    var cap = tier===0 ? 10 : 20;
     if(q==='again'){ c.reps=0; iv=0; e=Math.max(1.3,e-0.2); c.lapses=(c.lapses||0)+1; }
-    else if(q==='hard'){ iv=iv<=0?1:Math.max(1,Math.round(iv*1.2)); e=Math.max(1.3,e-0.15); c.reps=(c.reps||0)+1; }
-    else if(q==='good'){ iv=iv<=0?1:Math.round(iv*e); c.reps=(c.reps||0)+1; }
-    else if(q==='easy'){ iv=iv<=0?3:Math.round(iv*e*1.3); e=e+0.15; c.reps=(c.reps||0)+1; }
+    else if(q==='hard'){ iv=iv<=0?1.5:Math.max(1.5,iv*1.2); e=Math.max(1.3,e-0.15); c.reps=(c.reps||0)+1; }
+    else if(q==='good'){ iv=iv<=0?4:iv*e; c.reps=(c.reps||0)+1; }
+    else if(q==='easy'){ iv=iv<=0?8:iv*e*1.3; e=e+0.15; c.reps=(c.reps||0)+1; }
+    iv=Math.round(Math.min(iv,cap)*10)/10;
     c.ease=e; c.interval=iv;
-    c.due = (q==='again') ? now() : now()+iv*DAY;
+    c.due = (q==='again') ? now() : now()+iv*HOUR;
     state.cards[id]=c;
     save();
     return iv;
+  }
+  /* מחזירים כרטיסייה חלשה לתור הנוכחי בעוד כמה כרטיסים (לא מחכים לשעות) */
+  function requeueSoon(id,minAhead,maxAhead){
+    var pos=Math.min(queue.length, minAhead+Math.floor(Math.random()*(maxAhead-minAhead+1)));
+    queue.splice(pos,0,id);
   }
 
   /* ---- Notes personnelles (sauvegarde auto : local immédiat + Firebase débattu) ---- */
@@ -880,8 +944,10 @@ function initExam(){
     var ids=CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);});
     if(!studyAll) ids=ids.filter(isDue);
     for(var i=ids.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=ids[i];ids[i]=ids[j];ids[j]=t;}
-    /* les plus difficiles d'abord (ease bas / lapses haut) */
+    /* קודם עדיפות (תרגול/QCM לפני הרצאה), ובתוך כל עדיפות — הקשות ביותר קודם */
     ids.sort(function(a,b){
+      var ta=tierOf(cardById[a]), tb=tierOf(cardById[b]);
+      if(ta!==tb) return ta-tb;
       var ca=state.cards[a],cb=state.cards[b];
       var sa=(ca?ca.ease:2.5)-((ca&&ca.lapses)||0)*0.3;
       var sb=(cb?cb.ease:2.5)-((cb&&cb.lapses)||0)*0.3;
@@ -890,6 +956,14 @@ function initExam(){
     queue=ids;
   }
   function dueCount(){ return CARDS.filter(function(c){return !isDeleted(c.id)&&isDue(c.id);}).length; }
+  function dueCounts(){
+    var q=0,l=0;
+    CARDS.forEach(function(c){
+      if(isDeleted(c.id)||!isDue(c.id)) return;
+      if(tierOf(c)===0) q++; else l++;
+    });
+    return {quiz:q,lecture:l,total:q+l};
+  }
 
   /* ---- UI ---- */
   var area=document.getElementById('examArea');
@@ -905,15 +979,18 @@ function initExam(){
   }
 
   function render(){
-    countEl.textContent = studyAll ? ('נותרו '+queue.length) : ('לחזרה: '+dueCount());
+    if(studyAll){ countEl.textContent='נותרו '+queue.length; }
+    else{ var dc=dueCounts(); countEl.textContent='לחזרה: '+dc.quiz+' תרגול · '+dc.lecture+' הרצאה'; }
     if(!current && !queue.length){ renderEmpty(); return; }
     if(!current){ next(); return; }
     var c=current;
-    var h='<div class="fcard'+(c.imp?' imp':'')+'">'+
-          (c.imp
-            ? '<div class="imp-banner"><span class="imp-stars">★</span> שאלת המרצה — חשובה מאוד למבחן <span class="imp-stars">★</span></div>'
-            : '<div class="fcard-sec">'+c.sec+'</div>')+
-          '<div class="fcard-q">'+c.q+'</div>';
+    var tier=tierOf(c);
+    var h='<div class="fcard '+(tier===0?'tier-quiz':'tier-lecture')+'">'+
+          (tier===0
+            ? '<div class="imp-banner quiz-banner"><span class="imp-stars">🎯</span> שאלת תרגול / בחינה — סבירות גבוהה מאוד <span class="imp-stars">🎯</span></div>'
+            : '<div class="imp-banner lecture-banner"><span class="imp-stars">⭐</span> שאלת הרצאה — חשוב להבנה <span class="imp-stars">⭐</span></div>')+
+          '<div class="fcard-q">'+c.q+'</div>'+
+          (c.explain ? '<button class="explain-btn" id="explainBtn"><span class="bulb">💡</span> הסבר מהיר</button>' : '');
     if(c.type==='mcq'){
       h+='<div class="mcq-opts" id="mcqOpts">';
       c.options.forEach(function(op,i){
@@ -950,6 +1027,36 @@ function initExam(){
            '<button id="delYes">כן, מחק</button><button id="delNo">ביטול</button></span>'+
        '</div></div>';
     area.innerHTML=h;
+
+    /* ---- bouton "הסבר מורחב" (popup avec le résumé complet du concept) ---- */
+    var explainBtn=document.getElementById('explainBtn');
+    if(explainBtn){
+      explainBtn.addEventListener('click',function(){
+        var modal=document.getElementById('explainModal');
+        var content=document.getElementById('explainContent');
+        var full=c.explain||'';
+        var plain=full.replace(/<[^>]+>/g,'');
+        var LIMIT=280;
+        if(plain.length<=LIMIT){
+          content.innerHTML=full;
+        } else {
+          /* חיתוך בגבול משפט קרוב ל-280 תווים, לא באמצע מילה */
+          var cut=full.slice(0,LIMIT);
+          var lastEnd=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('- '),cut.lastIndexOf(': '));
+          var shortHtml=(lastEnd>90?cut.slice(0,lastEnd+1):cut)+'…';
+          content.innerHTML='<div id="explainShort">'+shortHtml+'</div>'+
+            '<button class="mini-btn save" id="explainMoreBtn" style="margin-top:10px">הצג הסבר מלא</button>'+
+            '<div id="explainFull" style="display:none;margin-top:12px">'+full+'</div>';
+          var moreBtn=document.getElementById('explainMoreBtn');
+          moreBtn.addEventListener('click',function(){
+            document.getElementById('explainShort').style.display='none';
+            moreBtn.style.display='none';
+            document.getElementById('explainFull').style.display='block';
+          });
+        }
+        modal.classList.add('open');
+      });
+    }
 
     /* notes : pré-remplir + sauvegarde automatique (local + Firebase) */
     var noteBox=document.getElementById('noteBox');
@@ -1038,16 +1145,20 @@ function initExam(){
     }
     area.querySelectorAll('.rate button').forEach(function(b){
       b.addEventListener('click',function(){
-        rate(current.id,b.getAttribute('data-q'));
+        var q=b.getAttribute('data-q'), id=current.id;
+        rate(id,q);
+        /* כרטיסים חלשים חוזרים תוך כמה כרטיסים באותה הפעלה, לא מחכים לשעות */
+        if(q==='again') requeueSoon(id,4,8);
+        else if(q==='hard') requeueSoon(id,14,22);
         current=null; next();
       });
     });
   }
 
   function renderEmpty(){
-    var n=dueCount();
+    var dc=dueCounts(), n=dc.total;
     area.innerHTML='<div class="exam-empty"><div class="big">כל הכבוד! 🎉</div>'+
-      '<p>'+(n?('יש '+n+' כרטיסים לחזרה.'):'אין כרגע כרטיסים לחזרה. חזרו מאוחר יותר, או תרגלו את כל הכרטיסים עכשיו.')+'</p>'+
+      '<p>'+(n?('יש '+n+' כרטיסים לחזרה ('+dc.quiz+' תרגול · '+dc.lecture+' הרצאה).'):'אין כרגע כרטיסים לחזרה. חזרו בעוד כמה שעות, או תרגלו את כל הכרטיסים עכשיו.')+'</p>'+
       '<button id="studyAllBtn">'+(n?'התחלת חזרה':'תרגול כל הכרטיסים')+'</button></div>';
     document.getElementById('studyAllBtn').addEventListener('click',function(){
       if(!n){ studyAll=true; } else { studyAll=false; }
