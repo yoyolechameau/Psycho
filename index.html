@@ -1006,7 +1006,7 @@ function initExam(){
           (tier===0
             ? '<div class="imp-banner quiz-banner"><span class="imp-stars">🎯</span> שאלת תרגול / בחינה — סבירות גבוהה מאוד <span class="imp-stars">🎯</span></div>'
             : '<div class="imp-banner lecture-banner"><span class="imp-stars">⭐</span> שאלת הרצאה — חשוב להבנה <span class="imp-stars">⭐</span></div>')+
-          '<div class="fcard-q">'+c.q+'</div>'+
+          '<div class="fcard-q" id="fcardQ">'+c.q+'</div>'+
           (c.explain ? '<button class="explain-btn" id="explainBtn"><span class="bulb">💡</span> הסבר מהיר</button>' : '');
     if(c.type==='mcq'){
       h+='<div class="mcq-opts" id="mcqOpts">';
@@ -1154,10 +1154,13 @@ function initExam(){
       });
     } else {
       document.getElementById('revealBtn').addEventListener('click',function(){
+        var q=document.getElementById('fcardQ');
+        if(q) q.style.display='none';
         document.getElementById('fcardA').classList.add('show');
         this.style.display='none';
         document.getElementById('rate').classList.add('show');
         showNotes();
+        area.scrollTop=0;
       });
     }
     area.querySelectorAll('.rate button').forEach(function(b){
