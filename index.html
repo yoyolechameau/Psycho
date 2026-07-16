@@ -907,10 +907,17 @@ function initExam(){
     return null;
   }
 
-  /* ---- סיווג רמת שליטה בכרטיסייה, מבוסס על מצב הלמידה הקיים ---- */
+  /* ---- סיווג רמת שליטה בכרטיסייה, מבוסס על התשובה האחרונה (לא כל ההיסטוריה) ---- */
   function classifyCard(id){
     var c=state.cards[id];
-    if(!c || (!c.reps && !c.lapses)) return 'new';
+    if(!c || (!c.reps && !c.lapses && !c.lastQ)) return 'new';
+    if(c.lastQ){
+      /* לוגיקה חדשה: מסתמכת על התשובה האחרונה בפועל */
+      if(c.lastQ==='again') return 'hard';
+      if((c.streak||0)>=2) return 'perfect';
+      return 'known';
+    }
+    /* נתונים ישנים (מלפני העדכון) שאין להם עדיין lastQ - הערכה זמנית לפי הממוצע הכללי */
     if((c.lapses||0)>0) return 'hard';
     if((c.ease||2.5)>=2.8) return 'perfect';
     return 'known';
@@ -979,6 +986,9 @@ function initExam(){
     iv=Math.round(Math.min(iv,cap)*10)/10;
     c.ease=e; c.interval=iv;
     c.due = (q==='again') ? now() : now()+iv*HOUR;
+    /* מעקב אחר התשובה האחרונה (לצורך סיווג "מה שולט בו כרגע", לא כל ההיסטוריה) */
+    c.lastQ=q;
+    c.streak=(q==='easy') ? ((c.streak||0)+1) : 0;
     state.cards[id]=c;
     save();
     return iv;
