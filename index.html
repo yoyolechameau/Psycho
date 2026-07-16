@@ -464,6 +464,21 @@
   .set-btn.ghost{background:var(--paper-2);color:var(--ink);border:1px solid var(--line)}
   .set-btn.danger{background:#d9534f}
   .sync-state{font-size:12.5px;font-weight:700;margin-top:6px}
+
+  /* ---- Panneau chapitres + statistiques ---- */
+  .chap-row{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin-bottom:10px;cursor:pointer;}
+  .chap-row:hover{border-color:var(--primary);}
+  .chap-row.chap-all{background:var(--primary-soft);border-color:var(--primary);}
+  .chap-row-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px;}
+  .chap-row-head span:first-child{font-family:'Heebo',sans-serif;font-weight:800;font-size:13.5px;color:var(--primary-dark);}
+  .chap-count{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+  .stat-bar{display:flex;width:100%;height:10px;border-radius:6px;overflow:hidden;background:var(--line);margin-bottom:7px;}
+  .stat-bar span{height:100%;}
+  .sb-perfect{background:#3f9b6e;} .sb-known{background:#5aa9c9;} .sb-hard{background:#efa12a;} .sb-new{background:#d8d0bd;}
+  .stat-legend{display:flex;flex-wrap:wrap;gap:9px;font-size:10.5px;color:var(--ink-soft);}
+  .stat-legend .lg{display:flex;align-items:center;gap:3px;}
+  .chap-sub{font-size:10.5px;color:var(--ink-soft);margin:0 0 12px;}
   .sync-on{color:#2e7d52}.sync-off{color:var(--ink-soft)}
 </style>
 </head>
@@ -534,11 +549,20 @@
 <div class="exam" id="exam" role="dialog" aria-modal="true">
   <div class="exam-top">
     <button class="exam-icon" id="examClose" aria-label="סגירה">×</button>
-    <h2>מצב מבחן — כרטיסיות</h2>
+    <h2 id="examTitle">מצב מבחן — כרטיסיות</h2>
     <span class="count" id="examCount"></span>
+    <button class="exam-icon" id="examChapters" aria-label="פרקים וסטטיסטיקה">📊</button>
     <button class="exam-icon" id="examSet" aria-label="הגדרות">⚙</button>
   </div>
   <div class="exam-body" id="examArea"></div>
+
+  <div class="exam-settings" id="examChaptersPanel">
+    <div class="exam-top">
+      <button class="exam-icon" id="chapBack" aria-label="חזרה">→</button>
+      <h2>בחירת פרק וסטטיסטיקה</h2>
+    </div>
+    <div class="set-body" id="chapBody"></div>
+  </div>
 
   <div class="exam-settings" id="examSettings">
     <div class="exam-top">
@@ -867,6 +891,39 @@ function initExam(){
   var cardById={}; CARDS.forEach(function(c){cardById[c.id]=c;});
   function tierOf(c){ return (c&&c.sec&&c.sec.indexOf('תרגול')>-1) ? 0 : 1; } /* 0=תרגול (עדיפות עליונה), 1=הרצאה */
 
+  /* ---- זיהוי פרק מתוך מזהה הכרטיסייה ---- */
+  var CHAPTER_TITLES={
+    '1':'הפסיכולוגיה בחיינו','2':'שיטות מחקר בפסיכולוגיה','3':'היסודות הביולוגיים',
+    '4':'תחושה ותפיסה','5':'למידה וניתוח התנהגות','6':'זיכרון',
+    '7':'חשיבה, שפה ואינטליגנציה','8':'פסיכולוגיה חברתית','9':'התפתחות',
+    '10':'מוטיבציה','11':'רגש','12':'אישיות','13':'פסיכופתולוגיה','14':'טיפול'
+  };
+  function chapterOf(id){
+    if(/^quiz_exam_/.test(id)) return null; /* כרטיסי בוחן ישנים, ללא פרק ספציפי */
+    var m=id.match(/^(?:prof|quiz)(\d+)_/);
+    if(m) return m[1];
+    if(/^prof(0[1-9]|1[0-3])$/.test(id)) return '1';
+    if(/^quiz(0[1-9]|1[0-9]|2[0-6])$/.test(id)) return '1';
+    return null;
+  }
+
+  /* ---- סיווג רמת שליטה בכרטיסייה, מבוסס על מצב הלמידה הקיים ---- */
+  function classifyCard(id){
+    var c=state.cards[id];
+    if(!c || (!c.reps && !c.lapses)) return 'new';
+    if((c.lapses||0)>0) return 'hard';
+    if((c.ease||2.5)>=2.8) return 'perfect';
+    return 'known';
+  }
+  function computeStats(ids){
+    var n={new:0,hard:0,known:0,perfect:0};
+    ids.forEach(function(id){ n[classifyCard(id)]++; });
+    var total=ids.length;
+    function pct(x){ return total? Math.round(x/total*100):0; }
+    return {total:total, n:n,
+      pct:{new:pct(n.new), hard:pct(n.hard), known:pct(n.known), perfect:pct(n.perfect)}};
+  }
+
   /* ---- Firebase (optionnel) ---- */
   var db=null, syncCode=localStorage.getItem(LS_SYNC)||'';
   try{
@@ -956,9 +1013,14 @@ function initExam(){
   }
 
   /* ---- File de session ---- */
-  var queue=[], current=null, studyAll=false;
+  var queue=[], current=null, studyAll=false, studyScope=null; /* studyScope=null (הכל) או מספר פרק כמחרוזת */
+  function scopeIds(ids){
+    if(!studyScope) return ids;
+    return ids.filter(function(id){ return chapterOf(id)===studyScope; });
+  }
   function buildQueue(){
     var ids=CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);});
+    ids=scopeIds(ids);
     if(!studyAll) ids=ids.filter(isDue);
     for(var i=ids.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=ids[i];ids[i]=ids[j];ids[j]=t;}
     /* קודם עדיפות (תרגול/QCM לפני הרצאה), ובתוך כל עדיפות — הקשות ביותר קודם */
@@ -972,14 +1034,19 @@ function initExam(){
     });
     queue=ids;
   }
-  function dueCount(){ return CARDS.filter(function(c){return !isDeleted(c.id)&&isDue(c.id);}).length; }
+  function dueCount(){ return scopeIds(CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);})).filter(isDue).length; }
   function dueCounts(){
     var q=0,l=0;
-    CARDS.forEach(function(c){
-      if(isDeleted(c.id)||!isDue(c.id)) return;
-      if(tierOf(c)===0) q++; else l++;
+    scopeIds(CARDS.map(function(c){return c.id;})).forEach(function(id){
+      if(isDeleted(id)||!isDue(id)) return;
+      if(tierOf(cardById[id])===0) q++; else l++;
     });
     return {quiz:q,lecture:l,total:q+l};
+  }
+  function updateExamTitle(){
+    var t=document.getElementById('examTitle');
+    if(!t) return;
+    t.textContent = studyScope ? ('מבחן — פרק '+studyScope+(CHAPTER_TITLES[studyScope]?(' · '+CHAPTER_TITLES[studyScope]):'')) : 'מצב מבחן — כל הכרטיסים';
   }
 
   /* ---- UI ---- */
@@ -1186,6 +1253,50 @@ function initExam(){
     });
   }
 
+  /* ---- פרקים + סטטיסטיקה ---- */
+  function chapRowHtml(scope,title,stats){
+    return '<div class="chap-row'+(scope==='all'?' chap-all':'')+'" data-scope="'+scope+'">'+
+      '<div class="chap-row-head"><span>'+title+'</span><span class="chap-count">'+stats.total+' כרטיסים</span></div>'+
+      '<div class="stat-bar">'+
+        (stats.pct.perfect?'<span class="sb-perfect" style="width:'+stats.pct.perfect+'%"></span>':'')+
+        (stats.pct.known?'<span class="sb-known" style="width:'+stats.pct.known+'%"></span>':'')+
+        (stats.pct.hard?'<span class="sb-hard" style="width:'+stats.pct.hard+'%"></span>':'')+
+        (stats.pct.new?'<span class="sb-new" style="width:'+stats.pct.new+'%"></span>':'')+
+      '</div>'+
+      '<div class="stat-legend">'+
+        '<span class="lg">🟢 מושלם '+stats.pct.perfect+'%</span>'+
+        '<span class="lg">🔵 ידוע '+stats.pct.known+'%</span>'+
+        '<span class="lg">🟠 קשה '+stats.pct.hard+'%</span>'+
+        '<span class="lg">⚪ לא נלמד '+stats.pct.new+'%</span>'+
+      '</div>'+
+    '</div>';
+  }
+  function renderChaptersPanel(){
+    var allIds=CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);});
+    var body=document.getElementById('chapBody');
+    var html='<p class="chap-sub">בחרו על מה לתרגל — הכרטיסים יסודרו מחדש לפי הבחירה. הצבעים מראים כמה אתם שולטים בכל קבוצה, על סמך הדירוגים שנתתם עד כה.</p>';
+    html+=chapRowHtml('all','כל הכרטיסים',computeStats(allIds));
+
+    var byChap={};
+    allIds.forEach(function(id){ var ch=chapterOf(id); if(ch) (byChap[ch]=byChap[ch]||[]).push(id); });
+    var nums=Object.keys(byChap).sort(function(a,b){return parseInt(a,10)-parseInt(b,10);});
+    nums.forEach(function(num){
+      var title='פרק '+num+(CHAPTER_TITLES[num]?(' — '+CHAPTER_TITLES[num]):'');
+      html+=chapRowHtml(num,title,computeStats(byChap[num]));
+    });
+    body.innerHTML=html;
+    body.querySelectorAll('.chap-row').forEach(function(row){
+      row.addEventListener('click',function(){
+        var sc=row.getAttribute('data-scope');
+        studyScope=(sc==='all')?null:sc;
+        updateExamTitle();
+        document.getElementById('examChaptersPanel').classList.remove('open');
+        studyAll=false;
+        if(dueCount()===0){ renderEmpty(); } else { startSession(); }
+      });
+    });
+  }
+
   function startSession(){ buildQueue(); current=null; next(); }
 
   function updateBadge(){
@@ -1200,12 +1311,21 @@ function initExam(){
   function openExam(){
     exam.classList.add('open');
     document.body.classList.add('exam-open');
+    updateExamTitle();
     pullCloud(function(){ updateBadge(); studyAll=false; if(dueCount()===0){renderEmpty();} else {startSession();} });
   }
   function closeExam(){ exam.classList.remove('open'); document.body.classList.remove('exam-open'); }
   /* le bouton est déjà câblé plus haut : on expose openExam et on ouvre si déjà demandé */
   __examOpen=openExam; __examReady=true;
   if(exam.classList.contains('open')) openExam();
+
+  /* ---- פרקים וסטטיסטיקה ---- */
+  var chapPanel=document.getElementById('examChaptersPanel');
+  document.getElementById('examChapters').addEventListener('click',function(){
+    renderChaptersPanel();
+    chapPanel.classList.add('open');
+  });
+  document.getElementById('chapBack').addEventListener('click',function(){ chapPanel.classList.remove('open'); });
 
   /* ---- Réglages ---- */
   var setPanel=document.getElementById('examSettings');
