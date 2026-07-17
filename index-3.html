@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>כרטיסיית חזרה — מבוא לפסיכולוגיה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700&family=Heebo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f1e7;
+    --paper-2:#fffdf8;
+    --ink:#24211c;
+    --ink-soft:#5d564b;
+    --line:#e3dac8;
+    --primary:#2f6d63;
+    --primary-dark:#1f4f47;
+    --primary-soft:#e4efe9;
+    --accent:#c2562f;
+    --accent-soft:#f7e4da;
+    --hl:#ffe9a3;
+    --hl-edge:#f4cf63;
+    --similar-bg:#e8f1e6;
+    --similar-edge:#3f7d4f;
+    --different-bg:#f8e7df;
+    --different-edge:#c2562f;
+    --shadow:0 8px 30px rgba(40,34,22,.10);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Assistant',sans-serif;
+    background:
+      radial-gradient(1200px 600px at 100% -10%, #efe7d4 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 110%, #ece2cd 0%, transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    line-height:1.75;
+    font-size:17px;
+  }
+
+  /* ---------- Page title (scrolls away, not sticky) ---------- */
+  .page-title{
+    max-width:1180px; margin:0 auto; padding:30px 22px 6px;
+    display:flex; align-items:center; gap:13px;
+  }
+  .page-title .mark{
+    width:44px;height:44px;border-radius:12px;flex:none;
+    background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+    color:#fff;display:grid;place-items:center;
+    font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:23px;
+    box-shadow:var(--shadow);
+  }
+  .page-title h1{font-family:'Frank Ruhl Libre',serif;font-size:22px;margin:0;font-weight:900;}
+  .page-title small{display:block;color:var(--ink-soft);font-weight:600;font-size:13px;}
+
+  /* ---------- Floating search (loupe) ---------- */
+  .fab-search{
+    position:fixed; top:16px; right:16px; z-index:60;
+    width:40px; height:40px; border-radius:50%;
+    border:1.5px solid var(--line);
+    background:var(--paper-2); color:var(--primary-dark);
+    display:grid; place-items:center; cursor:pointer;
+    box-shadow:var(--shadow); transition:.18s;
+  }
+  .fab-search:hover{background:var(--primary);color:#fff;border-color:var(--primary);transform:scale(1.06);}
+  .fab-search svg{width:18px;height:18px;}
+
+  .search-panel{
+    position:fixed; top:62px; right:16px; z-index:60;
+    width:min(360px, calc(100vw - 36px));
+    background:var(--paper-2); border:1.5px solid var(--line);
+    border-radius:16px; box-shadow:0 16px 44px rgba(40,34,22,.20);
+    padding:14px; opacity:0; transform:translateY(-10px) scale(.98);
+    pointer-events:none; transition:.2s ease;
+  }
+  .search-panel.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+  .search-row{position:relative;}
+  .search-row svg{
+    position:absolute; inset-inline-start:14px; top:50%; transform:translateY(-50%);
+    width:18px;height:18px;color:var(--ink-soft); pointer-events:none;
+  }
+  #search{
+    width:100%; padding:12px 44px 12px 40px;
+    border:1.5px solid var(--line); border-radius:11px;
+    background:var(--paper); color:var(--ink);
+    font-family:inherit; font-size:15.5px; font-weight:600;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  #search:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-soft);}
+  .clear-search{
+    position:absolute; inset-inline-end:10px; top:50%; transform:translateY(-50%);
+    width:24px;height:24px;border:none;border-radius:50%;cursor:pointer;
+    background:var(--line);color:var(--ink-soft);display:none;place-items:center;font-size:15px;line-height:1;
+  }
+  .clear-search.show{display:grid;}
+  .panel-hint{margin:9px 4px 2px;font-size:11.5px;color:var(--ink-soft);}
+  .panel-hint kbd{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:inherit;font-weight:700;}
+
+  /* ---------- Layout ---------- */
+  .layout{max-width:1180px; margin:0 auto; padding:28px 22px 80px;
+    display:grid; grid-template-columns:260px 1fr; gap:34px; align-items:start;}
+  nav.toc{position:sticky; top:24px;}
+  .toc-title{font-size:12.5px; font-weight:800; letter-spacing:1px;
+    color:var(--ink-soft); text-transform:uppercase; margin:0 4px 12px;}
+  .toc ul{list-style:none;margin:0;padding:0;}
+  .toc-group{margin-bottom:10px;}
+  .toc-grouphead{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;
+    color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    padding:10px 13px;border-radius:10px;}
+  .toc-grouphead .toc-chev{width:16px;height:16px;transition:transform .2s;flex-shrink:0;}
+  .toc-group.collapsed .toc-chev{transform:rotate(-90deg);}
+  .toc-parts{display:block;margin:5px 6px 0;border-inline-start:2px solid var(--line);padding-inline-start:8px;}
+  .toc-group.collapsed .toc-parts{display:none;}
+  .toc .toc-chap{
+    display:block; text-decoration:none; cursor:pointer;
+    font-family:'Frank Ruhl Libre',serif; font-weight:600; font-size:14.5px;
+    color:var(--ink-soft); margin:3px 0; padding:9px 11px; border-radius:9px;
+    border-inline-start:3px solid transparent; transition:.15s;
+  }
+  .toc .toc-chap:hover{background:var(--paper-2);color:var(--ink);}
+  .toc .toc-chap.active{background:var(--primary-soft);color:var(--primary-dark);font-weight:700;border-inline-start-color:var(--primary);}
+
+  /* ---------- Cards ---------- */
+  .stream{display:flex;flex-direction:column;gap:26px;min-width:0;}
+  .chap-head{display:flex;align-items:center;gap:14px;margin:6px 0 2px;}
+  .chap-head .num{
+    font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:15px;
+    background:var(--accent);color:#fff;border-radius:9px;padding:5px 12px;flex:none;
+  }
+  .chap-head h2{font-family:'Frank Ruhl Libre',serif;font-size:26px;margin:0;font-weight:900;}
+
+  .card{
+    background:var(--paper-2); border:1px solid var(--line);
+    border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+    scroll-margin-top:100px;
+  }
+  .card-head{
+    display:flex;align-items:center;gap:14px;cursor:pointer;
+    padding:18px 22px; user-select:none;
+    background:linear-gradient(180deg, #fffefb, #fbf6ec);
+    border-bottom:1px solid var(--line);
+  }
+  .card-head .qtag{
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.5px;
+    color:#fff;background:linear-gradient(145deg,var(--primary),var(--primary-dark));
+    padding:6px 12px;border-radius:999px;flex:none;
+  }
+  .card-head h3{font-family:'Frank Ruhl Libre',serif;font-size:21px;margin:0;font-weight:700;flex:1;}
+  .chev{width:22px;height:22px;color:var(--ink-soft);transition:transform .25s;flex:none;}
+  .card.collapsed .chev{transform:rotate(-90deg);}
+  .card-body{padding:22px 24px 26px;}
+  .card.collapsed .card-body{display:none;}
+
+  .card-body p{margin:0 0 14px;}
+  .lead{color:var(--ink-soft);font-weight:600;}
+  .qstmt{background:#eef4f3;border:1px solid var(--line);border-inline-start:4px solid var(--primary);
+    border-radius:11px;padding:13px 16px;margin:0 0 18px;
+    font-family:'Frank Ruhl Libre',serif;font-size:17.5px;line-height:1.65;color:var(--ink);font-weight:500;}
+  .qstmt::before{content:"השאלה";display:block;font-family:'Heebo',sans-serif;font-weight:800;
+    font-size:11px;letter-spacing:1px;color:var(--primary-dark);margin-bottom:5px;}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px 0 18px;
+    border:1px solid var(--line);border-radius:12px;}
+  table.cmp{border-collapse:collapse;width:100%;min-width:680px;font-family:'Assistant',sans-serif;font-size:14px;}
+  table.cmp th,table.cmp td{border:1px solid var(--line);padding:10px 12px;text-align:right;vertical-align:top;line-height:1.55;}
+  table.cmp thead th{background:var(--primary-soft);color:var(--primary-dark);
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:12.5px;white-space:nowrap;}
+  table.cmp td.rowhead{background:#fbf6ec;font-family:'Frank Ruhl Libre',serif;font-weight:700;
+    font-size:15px;white-space:nowrap;color:var(--primary-dark);}
+  table.cmp tbody tr:nth-child(even) td{background:rgba(47,109,99,.04);}
+
+  /* definition highlight */
+  .def{
+    position:relative; margin:6px 0 20px; padding:18px 20px 18px 22px;
+    background:var(--paper);
+    border:1px solid var(--hl-edge);
+    border-inline-start:6px solid var(--hl-edge);
+    border-radius:12px;
+  }
+  .def .def-label{
+    display:inline-block;font-family:'Heebo',sans-serif;font-weight:800;font-size:11.5px;
+    letter-spacing:1px;color:#8a6b12;background:var(--hl);
+    padding:3px 10px;border-radius:6px;margin-bottom:8px;
+  }
+  .def .def-text{font-family:'Frank Ruhl Libre',serif;font-size:19.5px;font-weight:700;line-height:1.6;}
+  mark{background:linear-gradient(120deg, var(--hl) 0%, #fff0bf 100%);
+    padding:.05em .25em;border-radius:4px;color:inherit;box-decoration-break:clone;-webkit-box-decoration-break:clone;}
+  mark.key{background:linear-gradient(120deg, #bfe6d6 0%, #dcf2e8 100%);color:#10463a;}
+
+  /* key terms grid */
+  .terms{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:8px 0 6px;}
+  .term{
+    background:var(--paper);border:1px solid var(--line);border-radius:13px;
+    padding:15px 16px;position:relative;transition:.18s;
+  }
+  .term:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow);}
+  .term .t-name{
+    font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:18px;color:var(--primary-dark);
+    margin-bottom:5px;display:flex;align-items:center;gap:8px;
+  }
+  .term .t-name::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;}
+  .term .t-desc{font-size:15px;color:var(--ink);}
+
+  .subtitle{font-family:'Heebo',sans-serif;font-weight:800;font-size:13px;letter-spacing:.5px;
+    color:var(--ink-soft);margin:22px 0 10px;text-transform:uppercase;}
+
+  /* compare rows */
+  .compare{display:flex;flex-direction:column;gap:12px;margin-top:6px;}
+  .crow{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--paper);}
+  .crow .cname{
+    font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:17px;
+    padding:11px 16px;background:#fbf6ec;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:9px;
+  }
+  .crow .cname .badge-add{font-family:'Assistant';font-size:11px;font-weight:700;color:var(--accent);
+    background:var(--accent-soft);padding:2px 8px;border-radius:6px;}
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;}
+  .ccell{padding:13px 16px;font-size:15px;}
+  .ccell.sim{background:var(--similar-bg);border-inline-end:1px solid var(--line);}
+  .ccell.dif{background:var(--different-bg);}
+  .ctag{display:inline-block;font-family:'Heebo',sans-serif;font-weight:800;font-size:11px;letter-spacing:.5px;
+    padding:2px 9px;border-radius:6px;margin-bottom:6px;}
+  .ctag.s{color:#2c5b38;background:#cfe3cc;}
+  .ctag.d{color:#8c3a1c;background:#f0cdbd;}
+
+  .note{display:flex;gap:11px;align-items:flex-start;margin-top:16px;padding:14px 16px;
+    background:var(--primary-soft);border-radius:12px;font-size:15px;color:var(--primary-dark);}
+  .note svg{width:20px;height:20px;flex:none;margin-top:2px;}
+  .note b{font-weight:800;}
+
+  .source{display:inline-flex;align-items:center;gap:5px;font-family:'Heebo';font-weight:700;
+    font-size:11.5px;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);
+    border-radius:7px;padding:3px 9px;margin-inline-start:8px;vertical-align:middle;
+    cursor:pointer;transition:.15s;}
+  .source::before{content:"📖";font-size:11px;}
+  .source:hover{border-color:var(--primary);color:var(--primary-dark);background:var(--primary-soft);}
+  .source.repeat{color:var(--ink-soft);background:transparent;border-style:dashed;opacity:.85;}
+  .source.repeat::before{content:"↑";font-size:13px;font-weight:900;}
+  .source.repeat:hover{border-color:var(--ink-soft);color:var(--ink);background:var(--paper);}
+  .src-repeat-note{font-family:'Heebo',sans-serif;font-weight:700;font-size:13px;color:var(--primary-dark);
+    background:var(--primary-soft);border-radius:9px;padding:8px 12px;margin-bottom:14px;}
+
+  /* ---------- Source modal (citation exacte) ---------- */
+  .src-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+    background:rgba(30,25,18,.55);backdrop-filter:blur(3px);padding:22px;}
+  .src-modal.open{display:flex;animation:fadeIn .15s ease;}
+  .src-box{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;
+    max-width:640px;width:100%;max-height:82vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.32);
+    animation:popIn .18s ease;}
+  .src-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:15px 20px;background:linear-gradient(180deg,#fffefb,#fbf6ec);
+    border-bottom:1px solid var(--line);}
+  .src-page{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:18px;color:var(--primary-dark);
+    display:flex;align-items:center;gap:8px;}
+  .src-page::before{content:"📖";}
+  .src-close{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;cursor:pointer;
+    font-size:22px;line-height:1;background:var(--paper);color:var(--ink-soft);flex:none;transition:.15s;}
+  .src-close:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .src-quote{padding:20px 24px;}
+  .src-quote p{font-family:'Frank Ruhl Libre',serif;font-size:18px;line-height:1.9;margin:0 0 16px;
+    padding-inline-start:14px;border-inline-start:3px solid var(--hl-edge);}
+  .src-quote p:last-child{margin-bottom:0;}
+  .src-foot{padding:11px 20px 18px;color:var(--ink-soft);font-size:12px;text-align:center;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+
+  .no-results{display:none;text-align:center;padding:60px 20px;color:var(--ink-soft);}
+  .no-results.show{display:block;}
+  .no-results .big{font-family:'Frank Ruhl Libre',serif;font-size:24px;font-weight:700;color:var(--ink);}
+
+  footer{max-width:1180px;margin:0 auto;padding:0 22px 50px;color:var(--ink-soft);
+    font-size:13px;text-align:center;}
+  footer span{color:var(--primary-dark);font-weight:700;}
+
+  .hidden{display:none !important;}
+
+  /* ---------- Responsive ---------- */
+  @media(max-width:880px){
+    .layout{grid-template-columns:1fr;gap:18px;}
+    nav.toc{position:static;order:-1;background:var(--paper-2);border:1px solid var(--line);
+      border-radius:14px;padding:14px 16px;}
+    .toc{max-height:none;}
+    .terms{grid-template-columns:1fr;}
+    .search-hint{display:none;}
+  }
+  @media(max-width:540px){
+    body{font-size:16px;}
+    .cgrid{grid-template-columns:1fr;}
+    .ccell.sim{border-inline-end:none;border-bottom:1px solid var(--line);}
+    .chap-head h2{font-size:22px;}
+    .brand small{display:none;}
+  }
+  @media print{
+    .fab-search,.search-panel,nav.toc,.chev{display:none !important;}
+    .layout{grid-template-columns:1fr;}
+    .card{box-shadow:none;break-inside:avoid;}
+    .card.collapsed .card-body{display:block !important;}
+    body{background:#fff;}
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<style>
+  /* ===== Mode examen (flashcards) ===== */
+  .exam-btn{position:fixed;top:16px;inset-inline-start:16px;z-index:60;
+    display:flex;align-items:center;gap:7px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:14px;
+    padding:11px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(47,109,99,.35);}
+  .exam-btn:hover{transform:translateY(-1px);}
+  .exam-btn .star{font-size:15px}
+  .exam-badge{background:var(--accent);color:#fff;border-radius:999px;
+    font-size:11px;font-weight:800;min-width:18px;height:18px;display:inline-flex;
+    align-items:center;justify-content:center;padding:0 5px}
+
+  body.exam-open{overflow:hidden;}
+  .exam{position:fixed;inset:0;height:100dvh;z-index:200;background:var(--paper);display:none;
+    flex-direction:column;overscroll-behavior:contain;-webkit-tap-highlight-color:transparent;}
+  .exam.open{display:flex}
+  .exam-top{display:flex;align-items:center;gap:12px;padding:14px 18px;flex-shrink:0;
+    border-bottom:1px solid var(--line);background:var(--paper-2)}
+  .exam-top h2{font-family:'Heebo',sans-serif;font-size:16px;font-weight:800;color:var(--primary-dark);margin:0;flex:1}
+  .exam-top .count{font-family:'Heebo',sans-serif;font-size:13px;color:var(--ink-soft);font-weight:700}
+  .exam-icon{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--paper-2);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:var(--ink)}
+  .exam-icon:hover{background:var(--primary-soft)}
+
+  .exam-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:22px 16px calc(110px + env(safe-area-inset-bottom))}
+  .exam-body>*{flex-shrink:0;}
+  .fcard{width:100%;max-width:640px;background:var(--paper-2);border:1px solid var(--line);
+    border-radius:18px;box-shadow:0 8px 26px rgba(60,46,28,.08);overflow:hidden}
+  .fcard.tier-quiz{border:3px solid #efa12a;background:#fffaf0;
+    box-shadow:0 12px 36px rgba(239,150,30,.38);}
+  .fcard.tier-lecture{border:3px solid #3f9b6e;background:#f5fbf8;
+    box-shadow:0 12px 36px rgba(63,155,110,.26);}
+  .imp-banner{font-family:'Heebo',sans-serif;font-weight:900;font-size:15px;letter-spacing:.4px;
+    text-align:center;padding:13px 14px;text-shadow:0 1px 0 rgba(255,255,255,.35);}
+  .imp-banner.quiz-banner{color:#5c3408;
+    background:linear-gradient(135deg,#ffd24a,#f4a52a);border-bottom:2px solid #e0901c;}
+  .imp-banner.lecture-banner{color:#0f3d33;
+    background:linear-gradient(135deg,#bfe6d6,#8fcdb6);border-bottom:2px solid #3f9b6e;}
+  .imp-stars{font-size:16px;}
+  .fcard-sec{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;letter-spacing:.5px;
+    color:var(--primary);background:var(--primary-soft);padding:8px 16px;border-bottom:1px solid var(--line)}
+  .fcard-q{font-family:'Frank Ruhl Libre',serif;font-size:21px;line-height:1.6;color:var(--ink);
+    padding:22px 20px;font-weight:600}
+  .fcard-a{font-family:'Assistant',sans-serif;font-size:16px;line-height:1.75;color:var(--ink);
+    padding:0 20px 22px;border-top:1px dashed var(--line);margin-top:2px;display:none}
+  .fcard-a.show{display:block;padding-top:20px}
+  .fcard-a.show #ansView::before{content:"תשובה";display:block;font-family:'Heebo',sans-serif;
+    font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--primary);margin-bottom:9px;}
+  .fcard-a b{color:var(--primary-dark)}
+
+  /* ---------- Bouton "הסבר מורחב" + popup ---------- */
+  .explain-btn{display:inline-flex;align-items:center;gap:6px;margin:0 20px 14px;
+    border:1.5px solid var(--primary);background:var(--primary-soft);color:var(--primary-dark);
+    cursor:pointer;font-family:'Heebo',sans-serif;font-weight:800;font-size:13.5px;
+    padding:8px 14px;border-radius:20px;transition:.15s;}
+  .explain-btn:hover{background:var(--primary);color:#fff;}
+  .explain-btn .bulb{font-size:15px;}
+  .explain-modal{position:fixed;inset:0;z-index:260;display:none;align-items:center;justify-content:center;
+    background:rgba(30,25,18,.55);backdrop-filter:blur(3px);padding:22px;}
+  .explain-modal.open{display:flex;animation:fadeIn .15s ease;}
+  .explain-box{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;
+    max-width:600px;width:100%;max-height:82vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.32);
+    animation:popIn .18s ease;}
+  .explain-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:15px 20px;background:linear-gradient(180deg,#fffefb,#fbf6ec);
+    border-bottom:1px solid var(--line);}
+  .explain-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:17px;color:var(--primary-dark);
+    display:flex;align-items:center;gap:8px;}
+  .explain-title::before{content:"💡";}
+  .explain-close{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;cursor:pointer;
+    font-size:22px;line-height:1;background:var(--paper);color:var(--ink-soft);flex:none;transition:.15s;}
+  .explain-close:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .explain-content{padding:20px 24px;font-family:'Assistant',sans-serif;font-size:16px;line-height:1.85;color:var(--ink);
+    white-space:pre-line;}
+  .explain-content b{color:var(--primary-dark);}
+
+  .mcq-opts{display:flex;flex-direction:column;gap:9px;padding:4px 20px 20px}
+  .mcq-opt{display:flex;gap:10px;align-items:flex-start;text-align:start;cursor:pointer;
+    border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:12px 14px;
+    font-family:'Assistant',sans-serif;font-size:16px;line-height:1.5;color:var(--ink);width:100%}
+  .mcq-opt:hover{border-color:var(--primary)}
+  .mcq-opt .lett{font-family:'Heebo',sans-serif;font-weight:800;color:var(--primary);flex-shrink:0}
+  .mcq-opt.correct{background:#e7f4ec;border-color:#3f9b6e}
+  .mcq-opt.correct .lett{color:#2e7d52}
+  .mcq-opt.wrong{background:#fbe9e7;border-color:var(--accent)}
+  .mcq-opt.wrong .lett{color:var(--accent)}
+  .mcq-opt[disabled]{cursor:default}
+
+  .reveal-btn{display:block;width:calc(100% - 40px);margin:0 20px 20px;border:none;cursor:pointer;
+    background:var(--primary);color:#fff;font-family:'Heebo',sans-serif;font-weight:800;font-size:16px;
+    padding:14px;border-radius:12px}
+  .reveal-btn:hover{background:var(--primary-dark)}
+
+  .rate{position:fixed;left:0;right:0;bottom:0;width:100%;max-width:640px;margin:0 auto;
+    display:none;grid-template-columns:repeat(4,1fr);gap:8px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:var(--paper-2);border-top:1px solid var(--line);
+    box-shadow:0 -8px 24px rgba(60,46,28,.15);z-index:210;box-sizing:border-box}
+  .rate.show{display:grid}
+  .rate button{border:none;cursor:pointer;border-radius:12px;padding:13px 6px;color:#fff;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:14px;display:flex;flex-direction:column;gap:3px;align-items:center}
+  .rate button small{font-weight:600;font-size:11px;opacity:.9}
+  .r-again{background:#d9534f}.r-hard{background:#e08a3c}.r-good{background:#3f9b6e}.r-easy{background:#2f6d63}
+  .rate button:hover{filter:brightness(1.07)}
+
+  .fnotes{width:100%;max-width:640px;margin-top:14px;display:none;
+    background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-sizing:border-box}
+  .fnotes.show{display:block}
+  .fnotes label{display:flex;align-items:center;gap:6px;font-family:'Heebo',sans-serif;font-weight:800;
+    font-size:12.5px;color:var(--primary-dark);margin-bottom:7px}
+  .fnotes textarea{width:100%;min-height:74px;resize:vertical;border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;font-family:'Assistant',sans-serif;font-size:15.5px;line-height:1.6;color:var(--ink);
+    background:var(--paper);box-sizing:border-box;direction:rtl;text-align:right}
+  .fnotes textarea:focus{outline:none;border-color:var(--primary)}
+  .note-saved{display:block;margin-top:5px;font-family:'Heebo',sans-serif;font-size:12px;color:#2e7d52;height:15px}
+
+  .mini-btn{border:1px solid var(--line);background:var(--paper);color:var(--primary-dark);cursor:pointer;
+    font-family:'Heebo',sans-serif;font-weight:700;font-size:12.5px;padding:6px 10px;border-radius:8px;margin-inline-end:6px;margin-top:8px}
+  .mini-btn:hover{background:var(--primary-soft)}
+  .mini-btn.save{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .mini-btn.warn{color:#b4521f;border-color:#e3b9a6}
+  .ans-tools{margin-top:8px}
+  .edited-tag{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;color:var(--accent)}
+  .ans-orig{margin-top:10px;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:10px 12px}
+  .orig-label{font-family:'Heebo',sans-serif;font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:4px}
+  .ans-edit{width:100%;min-height:96px;resize:vertical;border:1px solid var(--primary);border-radius:10px;padding:10px 12px;
+    font-family:'Assistant',sans-serif;font-size:16px;line-height:1.65;color:var(--ink);background:var(--paper);box-sizing:border-box;direction:rtl;text-align:right}
+  .ans-edit-tools{margin-top:2px}
+  .fnotes-foot{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+  .del-btn{border:1px solid #e3b9a6;background:#fff;color:#c0392b;cursor:pointer;
+    font-family:'Heebo',sans-serif;font-weight:700;font-size:13px;padding:8px 12px;border-radius:9px}
+  .del-btn:hover{background:#fbe9e7}
+  .del-confirm{font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;color:var(--ink)}
+  .del-confirm button{border:none;cursor:pointer;border-radius:8px;padding:7px 12px;font-family:'Heebo',sans-serif;font-weight:800;font-size:12.5px;margin-inline-start:4px}
+  #delYes{background:#c0392b;color:#fff}
+  #delNo{background:var(--paper-2);color:var(--ink);border:1px solid var(--line)}
+
+  .exam-empty{text-align:center;max-width:460px;margin:auto;padding:30px}
+  .exam-empty .big{font-family:'Frank Ruhl Libre',serif;font-size:26px;color:var(--primary-dark);margin-bottom:10px}
+  .exam-empty p{color:var(--ink-soft);font-size:15px;line-height:1.7;margin-bottom:18px}
+  .exam-empty button{border:none;cursor:pointer;background:var(--primary);color:#fff;
+    font-family:'Heebo',sans-serif;font-weight:800;font-size:15px;padding:12px 22px;border-radius:12px}
+
+  .exam-settings{position:absolute;inset:0;background:var(--paper);z-index:5;display:none;
+    flex-direction:column;padding:0}
+  .exam-settings.open{display:flex}
+  .set-body{flex:1;overflow-y:auto;padding:22px 18px;max-width:640px;margin:0 auto;width:100%}
+  .set-body h3{font-family:'Heebo',sans-serif;color:var(--primary-dark);font-size:15px;margin:18px 0 8px}
+  .set-body p{color:var(--ink-soft);font-size:13.5px;line-height:1.6;margin:0 0 8px}
+  .set-body input,.set-body textarea{width:100%;border:1px solid var(--line);border-radius:10px;
+    padding:11px;font-family:'Assistant';font-size:15px;background:var(--paper-2);color:var(--ink)}
+  .set-body textarea{height:90px;resize:vertical;font-family:monospace;font-size:12px;direction:ltr}
+  .set-btn{border:none;cursor:pointer;background:var(--primary);color:#fff;font-family:'Heebo';
+    font-weight:800;font-size:14px;padding:10px 16px;border-radius:10px;margin-top:8px}
+  .set-btn.ghost{background:var(--paper-2);color:var(--ink);border:1px solid var(--line)}
+  .set-btn.danger{background:#d9534f}
+  .sync-state{font-size:12.5px;font-weight:700;margin-top:6px}
+
+  /* ---- Panneau chapitים + סטטיסטיקה (בחירה מרובה) ---- */
+  .chap-row{background:var(--paper-2);border:1.5px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin-bottom:10px;cursor:pointer;position:relative;transition:border-color .12s;}
+  .chap-row:hover{border-color:var(--primary);}
+  .chap-row.chap-all{background:var(--primary-soft);border-color:var(--primary);}
+  .chap-row.selected{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft) inset;}
+  .chap-row-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px;}
+  .chap-row-head span:first-child{font-family:'Heebo',sans-serif;font-weight:800;font-size:13.5px;color:var(--primary-dark);
+    display:flex;align-items:center;gap:8px;}
+  .chap-count{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+  .chap-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);background:var(--paper-2);
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:900;}
+  .chap-row.selected .chap-check{background:var(--primary);border-color:var(--primary);}
+  .stat-bar{display:flex;width:100%;height:10px;border-radius:6px;overflow:hidden;background:var(--line);margin-bottom:7px;}
+  .stat-bar span{height:100%;}
+  .sb-perfect{background:#3f9b6e;} .sb-known{background:#5aa9c9;} .sb-hard{background:#efa12a;} .sb-new{background:#d8d0bd;}
+  .stat-legend{display:flex;flex-wrap:wrap;gap:9px;font-size:10.5px;color:var(--ink-soft);}
+  .stat-legend .lg{display:flex;align-items:center;gap:3px;}
+
+  .chap-toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .chap-tool-btn{flex:1;min-width:auto;border:1.5px solid var(--primary);background:var(--paper-2);color:var(--primary-dark);
+    font-family:'Heebo',sans-serif;font-weight:700;font-size:11.5px;padding:8px 10px;border-radius:10px;cursor:pointer;}
+  .chap-tool-btn:active{background:var(--primary-soft);}
+  .chap-range{display:flex;align-items:center;gap:6px;background:var(--paper-2);border:1.5px solid var(--line);
+    border-radius:12px;padding:10px 12px;margin-bottom:14px;flex-wrap:wrap;}
+  .chap-range label{font-size:11.5px;color:var(--ink-soft);font-weight:700;}
+  .chap-range select{border:1px solid var(--line);border-radius:8px;padding:5px 6px;font-family:'Heebo';font-size:12.5px;
+    background:#fff;color:var(--ink);}
+  .chap-range button{border:none;background:var(--primary);color:#fff;font-family:'Heebo';font-weight:800;font-size:11.5px;
+    padding:7px 14px;border-radius:8px;cursor:pointer;margin-right:auto;}
+
+  .chap-footer{position:sticky;bottom:0;background:var(--paper);padding:12px 0 4px;margin-top:6px;
+    border-top:1px solid var(--line);}
+  .chap-start-btn{width:100%;border:none;background:var(--primary);color:#fff;font-family:'Heebo',sans-serif;
+    font-weight:900;font-size:15px;padding:14px;border-radius:14px;cursor:pointer;}
+  .chap-start-btn:disabled{background:var(--line);color:var(--ink-soft);cursor:default;}
+  .chap-sel-note{text-align:center;font-size:11.5px;color:var(--ink-soft);margin-bottom:8px;}
+  .chap-sub{font-size:10.5px;color:var(--ink-soft);margin:0 0 12px;}
+  .sync-on{color:#2e7d52}.sync-off{color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<button class="exam-btn" id="examBtn"><span class="star">✦</span> מצב מבחן <span class="exam-badge" id="examBadge" style="display:none">0</span></button>
+
+<button class="fab-search" id="fabSearch" aria-label="חיפוש" title="חיפוש (/)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+</button>
+
+<div class="search-panel" id="searchPanel">
+  <div class="search-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="search" type="text" placeholder="חיפוש נושא, מושג או הגדרה…" autocomplete="off">
+    <button class="clear-search" id="clearSearch" aria-label="ניקוי">×</button>
+  </div>
+  <div class="panel-hint">לחיצה על <kbd>/</kbd> פותחת חיפוש · <kbd>Esc</kbd> לסגירה</div>
+</div>
+
+<div class="page-title">
+  <div class="mark">פ</div>
+  <div>
+    <h1>כרטיסיית חזרה</h1>
+    <small>מבוא לפסיכולוגיה · 10136</small>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="toc">
+    <p class="toc-title">ניווט מהיר</p>
+    <ul id="toc-list"></ul>
+  </nav>
+
+  <main class="stream" id="stream"></main>
+
+  <div class="no-results" id="noResults">
+    <div class="big">לא נמצאו תוצאות</div>
+    <p>נסו מילת חיפוש אחרת.</p>
+  </div>
+</div>
+
+<footer>
+  כל התשובות מבוססות על <span>ספר הקורס, פרק 1 (עמ' 5–12)</span> · עודכן לאחרונה: <span id="updated"></span>
+</footer>
+
+<div class="src-modal" id="srcModal" role="dialog" aria-modal="true">
+  <div class="src-box" id="srcBox">
+    <div class="src-head">
+      <span class="src-page" id="srcPage"></span>
+      <button class="src-close" id="srcClose" aria-label="סגירה">×</button>
+    </div>
+    <div class="src-quote" id="srcBody"></div>
+    <div class="src-foot">הציטוט המדויק מתוך ספר הקורס · לחצו על × או מחוץ לחלון לסגירה</div>
+  </div>
+</div>
+
+<div class="explain-modal" id="explainModal" role="dialog" aria-modal="true">
+  <div class="explain-box" id="explainBox">
+    <div class="explain-head">
+      <span class="explain-title">הסבר מורחב</span>
+      <button class="explain-close" id="explainClose" aria-label="סגירה">×</button>
+    </div>
+    <div class="explain-content" id="explainContent"></div>
+  </div>
+</div>
+
+<div class="exam" id="exam" role="dialog" aria-modal="true">
+  <div class="exam-top">
+    <button class="exam-icon" id="examClose" aria-label="סגירה">×</button>
+    <h2 id="examTitle">מצב מבחן — כרטיסיות</h2>
+    <span class="count" id="examCount"></span>
+    <button class="exam-icon" id="examChapters" aria-label="פרקים וסטטיסטיקה">📊</button>
+    <button class="exam-icon" id="examSet" aria-label="הגדרות">⚙</button>
+  </div>
+  <div class="exam-body" id="examArea"></div>
+
+  <div class="exam-settings" id="examChaptersPanel">
+    <div class="exam-top">
+      <button class="exam-icon" id="chapBack" aria-label="חזרה">→</button>
+      <h2>בחירת פרק וסטטיסטיקה</h2>
+    </div>
+    <div class="set-body" id="chapBody"></div>
+  </div>
+
+  <div class="exam-settings" id="examSettings">
+    <div class="exam-top">
+      <button class="exam-icon" id="setBack" aria-label="חזרה">→</button>
+      <h2>הגדרות וסנכרון</h2>
+    </div>
+    <div class="set-body">
+      <h3>קוד סנכרון (בין מכשירים)</h3>
+      <p>הזינו את <b>אותו קוד</b> בטלפון ובמחשב כדי שההתקדמות תסונכרן ביניהם. בחרו קוד אישי (למשל מילה + מספר).</p>
+      <input id="syncInput" type="text" placeholder="לדוגמה: francois2026" autocomplete="off">
+      <button class="set-btn" id="syncSave">שמירה והפעלת סנכרון</button>
+      <div class="sync-state sync-off" id="syncState">סנכרון כבוי</div>
+
+      <h3>גיבוי ידני</h3>
+      <p>אם תעדיפו בלי סנכרון אוטומטי: ייצאו את ההתקדמות וייבאו אותה במכשיר השני.</p>
+      <button class="set-btn ghost" id="btnExport">ייצוא התקדמות (העתקה)</button>
+      <textarea id="ioBox" placeholder="כאן יופיע קוד הגיבוי, או הדביקו כאן קוד לייבוא…"></textarea>
+      <button class="set-btn ghost" id="btnImport">ייבוא מהקוד שלמעלה</button>
+
+      <h3>איפוס</h3>
+      <p>מחיקת כל ההתקדמות במכשיר זה.</p>
+      <button class="set-btn danger" id="btnReset">איפוס ההתקדמות</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== config Firebase ===== */
+var firebaseConfig = {
+  apiKey: "AIzaSyAJrKMesAqOnTpBbzTaDyfrGUNVRadN_3Y",
+  authDomain: "psycho-62fa6.firebaseapp.com",
+  projectId: "psycho-62fa6",
+  storageBucket: "psycho-62fa6.firebasestorage.app",
+  messagingSenderId: "1077173021703",
+  appId: "1:1077173021703:web:e207a1a941d3ec9089cea2"
+};
+</script>
+
+<script>
+/* Charge data.js avec anti-cache, puis lance l'app SEULEMENT quand les données sont prêtes */
+function bootData(cb){
+  var s = document.createElement('script');
+  s.src = 'data.js?t=' + Date.now();
+  s.onload = function(){
+    try{ cb(); }
+    catch(e){
+      console.error(e);
+      var el = document.getElementById('stream');
+      if(el) el.innerHTML = '<p style="padding:40px;text-align:center;color:#b33;direction:ltr;font-family:monospace;font-size:13px;white-space:pre-wrap">שגיאת JS באתחול (initApp):\n'+(e && e.stack || e)+'</p>';
+    }
+  };
+  s.onerror = function(){
+    var el = document.getElementById('stream');
+    if(el) el.innerHTML = '<p style="padding:40px;text-align:center;color:#5d564b">שגיאה בטעינת התוכן (data.js). בדקו את החיבור ונסו לרענן.</p>';
+  };
+  document.head.appendChild(s);
+}
+</script>
+<script>
+function initApp(){
+
+/* ---------- Rendering ---------- */
+const stream = document.getElementById('stream');
+const tocList = document.getElementById('toc-list');
+
+const seenSources = new Set();
+function srcBadge(key){
+  const s = SOURCES[key];
+  const label = s ? s.page : key;
+  const repeat = seenSources.has(key);
+  if(!repeat) seenSources.add(key);
+  return `<button type="button" class="source${repeat?' repeat':''}" data-src="${key}"${repeat?' title="אותו מקור שכבר הופיע למעלה"':''}>${label}</button>`;
+}
+function inline(t){
+  return (t||"")
+    .replace(/<m>/g,'<mark>').replace(/<\/m>/g,'</mark>')
+    .replace(/<k>/g,'<mark class="key">').replace(/<\/k>/g,'</mark>')
+    .replace(/\[\[([A-Za-z0-9_]+)\]\]/g,(m,k)=>srcBadge(k));
+}
+
+function renderBlock(b){
+  if(b.type==="p")        return `<p class="${b.lead?'lead':''}">${inline(b.text)}</p>`;
+  if(b.type==="q")        return `<div class="qstmt">${inline(b.text)}</div>`;
+  if(b.type==="table")    return `<div class="tablewrap"><table class="cmp"><thead><tr>${b.headers.map(h=>`<th>${inline(h)}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' class="rowhead"':''}>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  if(b.type==="subtitle") return `<div class="subtitle">${inline(b.text)}</div>`;
+  if(b.type==="def")      return `<div class="def"><span class="def-label">הגדרה</span>
+      <div class="def-text">${inline(b.text)}${b.src?srcBadge(b.src):''}</div></div>`;
+  if(b.type==="terms")    return `<div class="terms">${b.items.map(it=>`
+      <div class="term"><div class="t-name">${it.name}</div>
+      <div class="t-desc">${inline(it.desc)}${it.src?srcBadge(it.src):''}</div></div>`).join('')}</div>`;
+  if(b.type==="compare")  return `<div class="compare">${b.rows.map(r=>`
+      <div class="crow"><div class="cname">${r.name}${r.add?'<span class="badge-add">תוספת</span>':''}</div>
+      <div class="cgrid">
+        <div class="ccell sim"><span class="ctag s">דומה</span>${inline(r.similar)}</div>
+        <div class="ccell dif"><span class="ctag d">שונה</span>${inline(r.different)}</div>
+      </div></div>`).join('')}</div>`;
+  if(b.type==="note")     return `<div class="note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <div>${inline(b.text)}</div></div>`;
+  return "";
+}
+
+function searchText(entry){
+  let s = entry.tag + " " + entry.title + " ";
+  entry.blocks.forEach(b=>{
+    if(b.text) s += b.text + " ";
+    if(b.items) b.items.forEach(i=> s += i.name+" "+i.desc+" ");
+    if(b.rows)  b.rows.forEach(r=> s += r.name+" "+r.similar+" "+r.different+" ");
+  });
+  return s.replace(/\[\[[^\]]+\]\]/g,' ').replace(/<\/?[^>]+>/g,'').toLowerCase();
+}
+
+let __curChapNum=null, __curParts=null;
+DATA.chapters.forEach(ch=>{
+  const head = document.createElement('div');
+  head.className = 'chap-head';
+  head.id = 'head-'+ch.id;
+  head.innerHTML = `<span class="num">${ch.num}</span><h2>${ch.title}</h2>`;
+  head.dataset.chap = ch.id;
+  stream.appendChild(head);
+
+  /* Sommaire groupé par chapitre (repliable) */
+  if(ch.num !== __curChapNum){
+    __curChapNum = ch.num;
+    const group = document.createElement('li');
+    group.className = 'toc-group';
+    group.dataset.chapNum = ch.num;
+    const gh = document.createElement('div');
+    gh.className = 'toc-grouphead';
+    gh.innerHTML = `<span>${ch.num}</span><svg class="toc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>`;
+    gh.addEventListener('click', ()=> group.classList.toggle('collapsed'));
+    group.appendChild(gh);
+    __curParts = document.createElement('div');
+    __curParts.className = 'toc-parts';
+    group.appendChild(__curParts);
+    tocList.appendChild(group);
+  }
+  const tChap = document.createElement('a');
+  tChap.className = 'toc-chap';
+  tChap.setAttribute('role','button');
+  tChap.setAttribute('tabindex','0');
+  tChap.dataset.target = 'head-'+ch.id;
+  tChap.dataset.chap = ch.id;
+  tChap.textContent = ch.title;
+  __curParts.appendChild(tChap);
+
+  ch.entries.forEach(en=>{
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.id = en.id;
+    card.dataset.search = searchText(en);
+    card.dataset.chap = ch.id;
+    card.innerHTML = `
+      <div class="card-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span class="qtag">${en.tag}</span>
+        <h3>${en.title}</h3>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <div class="card-body">${en.blocks.map(renderBlock).join('')}</div>`;
+    stream.appendChild(card);
+  });
+});
+
+/* ---------- TOC navigation (no links, pure scroll) ---------- */
+function goTo(id){
+  const card = document.getElementById(id);
+  if(!card) return;
+  card.classList.remove('collapsed');   // ouvre la carte si elle était repliée
+  card.classList.remove('hidden');
+  card.scrollIntoView({behavior:'smooth', block:'start'});
+}
+tocList.addEventListener('click', e=>{
+  const a = e.target.closest('a[data-target]');
+  if(!a) return;
+  e.preventDefault();
+  goTo(a.dataset.target);
+});
+tocList.addEventListener('keydown', e=>{
+  if((e.key==='Enter'||e.key===' ') && e.target.dataset && e.target.dataset.target){
+    e.preventDefault();
+    goTo(e.target.dataset.target);
+  }
+});
+
+/* ---------- Search ---------- */
+const search = document.getElementById('search');
+const noResults = document.getElementById('noResults');
+const cards = [...document.querySelectorAll('.card')];
+const chapHeads = [...document.querySelectorAll('.chap-head')];
+const fab = document.getElementById('fabSearch');
+const panel = document.getElementById('searchPanel');
+const clearBtn = document.getElementById('clearSearch');
+
+function openSearch(){ panel.classList.add('open'); setTimeout(()=>search.focus(),60); }
+function closeSearch(){ panel.classList.remove('open'); }
+function toggleSearch(){ panel.classList.contains('open') ? closeSearch() : openSearch(); }
+
+fab.addEventListener('click', e=>{ e.stopPropagation(); toggleSearch(); });
+clearBtn.addEventListener('click', e=>{ e.stopPropagation(); search.value=''; runFilter(); search.focus(); });
+panel.addEventListener('click', e=>{ e.stopPropagation(); }); /* un tap dans le panneau ne le ferme pas */
+
+/* fermer en cliquant à l'extérieur (les clics fab/panneau ne remontent pas jusqu'ici) */
+document.addEventListener('click', ()=>{ if(panel.classList.contains('open')) closeSearch(); });
+
+function runFilter(){
+  const q = search.value.trim().toLowerCase();
+  clearBtn.classList.toggle('show', q.length>0);
+  let visible = 0;
+  cards.forEach(c=>{
+    const match = !q || c.dataset.search.includes(q);
+    c.classList.toggle('hidden', !match);
+    if(match) visible++;
+  });
+  chapHeads.forEach(h=>{
+    const any = cards.some(c=>c.dataset.chap===h.dataset.chap && !c.classList.contains('hidden'));
+    h.classList.toggle('hidden', !any);
+  });
+  document.querySelectorAll('#toc-list .toc-chap').forEach(a=>{
+    const c = document.getElementById(a.dataset.target);
+    a.classList.toggle('hidden', !!(c && c.classList.contains('hidden')));
+  });
+  document.querySelectorAll('#toc-list .toc-group').forEach(g=>{
+    const anyVisible = [...g.querySelectorAll('.toc-chap')].some(a=>!a.classList.contains('hidden'));
+    g.classList.toggle('hidden', !anyVisible);
+  });
+  noResults.classList.toggle('show', visible===0);
+}
+search.addEventListener('input', runFilter);
+
+/* ---------- Source modal (citation exacte du livre) ---------- */
+const srcModal = document.getElementById('srcModal');
+const srcPage  = document.getElementById('srcPage');
+const srcBody  = document.getElementById('srcBody');
+
+function openSrc(key, isRepeat){
+  const s = SOURCES[key];
+  if(!s || !s.paras) return;
+  srcPage.textContent = s.page;
+  srcBody.innerHTML = (isRepeat ? `<div class="src-repeat-note">↑ אותו מקור שכבר הופיע למעלה</div>` : '')
+    + s.paras.map(p=>`<p>${p}</p>`).join('');
+  srcModal.classList.add('open');
+}
+function closeSrc(){ srcModal.classList.remove('open'); }
+
+/* clic sur une pastille 📖 (או ↑) → ouvre la source */
+document.addEventListener('click', e=>{
+  const badge = e.target.closest('.source[data-src]');
+  if(badge){ e.stopPropagation(); openSrc(badge.dataset.src, badge.classList.contains('repeat')); }
+});
+/* fermeture : × , clic sur le fond, ou Échap */
+document.getElementById('srcClose').addEventListener('click', closeSrc);
+srcModal.addEventListener('click', e=>{ if(e.target===srcModal) closeSrc(); });
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='/' && document.activeElement!==search){ e.preventDefault(); openSearch(); }
+  if(e.key==='Escape'){ closeSrc(); search.value=''; runFilter(); closeSearch(); search.blur(); }
+});
+
+/* ---------- Active link on scroll (surligne la partie courante) ---------- */
+const links = [...document.querySelectorAll('#toc-list .toc-chap')];
+if(typeof IntersectionObserver !== 'undefined'){
+  const obs = new IntersectionObserver(es=>{
+    es.forEach(en=>{
+      if(en.isIntersecting){
+        const chap = en.target.dataset.chap;
+        links.forEach(l=>l.classList.toggle('active', l.dataset.chap===chap));
+      }
+    });
+  },{rootMargin:'-20% 0px -70% 0px'});
+  cards.forEach(c=>obs.observe(c));
+}
+
+document.getElementById('updated').textContent =
+  new Date().toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'});
+
+}
+/* lance tout : charge data.js (anti-cache) puis affiche */
+bootData(initApp);
+
+/* ===== Mode examen (flashcards + répétition espacée + sync Firebase) ===== */
+var __examOpen=null, __examReady=false, __examError='';
+(function wireExamButton(){
+  var examEl=document.getElementById('exam');
+  function tryOpen(){
+    examEl.classList.add('open');
+    document.body.classList.add('exam-open');
+    if(__examReady && __examOpen){ __examOpen(); }
+    else if(__examError){ showExamError(__examError); }
+    else { var a=document.getElementById('examArea'); if(a) a.innerHTML='<div class="exam-empty"><div class="big">טוען…</div><p>רגע, טוענים את הכרטיסים…</p></div>'; }
+  }
+  var btn=document.getElementById('examBtn'); if(btn) btn.addEventListener('click',tryOpen);
+  var cl=document.getElementById('examClose'); if(cl) cl.addEventListener('click',function(){examEl.classList.remove('open');document.body.classList.remove('exam-open');});
+})();
+
+/* ---------- Modal "הסבר מורחב" (popup, fonctionne dans tous les modes) ---------- */
+(function wireExplainModal(){
+  var m=document.getElementById('explainModal');
+  if(!m) return;
+  function closeExplain(){ m.classList.remove('open'); }
+  var cl=document.getElementById('explainClose'); if(cl) cl.addEventListener('click',closeExplain);
+  m.addEventListener('click',function(e){ if(e.target===m) closeExplain(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeExplain(); });
+})();
+function showExamError(msg){
+  __examError=msg;
+  var a=document.getElementById('examArea');
+  if(a) a.innerHTML='<div class="exam-empty"><div class="big">בעיה בטעינת הכרטיסים</div><p>'+msg+'</p></div>';
+}
+(function loadCards(){
+  var s=document.createElement('script');
+  s.src='cards.js?t='+Date.now();
+  s.onload=function(){ try{ initExam(); }catch(e){ console.error(e); showExamError('שגיאה: '+e.message); } };
+  s.onerror=function(){ showExamError('הקובץ cards.js לא נטען. ודאו שהעליתם ל-GitHub קובץ בשם בדיוק cards.js (אותיות קטנות), באותה תיקייה של index.html.'); };
+  document.head.appendChild(s);
+})();
+
+function initExam(){
+  if(typeof CARDS==='undefined'||!CARDS.length){
+    showExamError('CARDS לא נטען כראוי (typeof='+typeof CARDS+', length='+(typeof CARDS!=='undefined'?CARDS.length:'-')+'). ודאו שהקובץ cards.js תקין וזהה לזה שנשלח.');
+    return;
+  }
+  try{
+  var DAY=86400000, HOUR=3600000, now=function(){return Date.now();};
+  var LS_PROG='psycho_prog', LS_SYNC='psycho_sync';
+  /* ---- Mode דחיסה למבחן (36h) : עדיפות לשאלות תרגול/QCM ---- */
+  var cardById={}; CARDS.forEach(function(c){cardById[c.id]=c;});
+  function tierOf(c){ return (c&&c.sec&&c.sec.indexOf('תרגול')>-1) ? 0 : 1; } /* 0=תרגול (עדיפות עליונה), 1=הרצאה */
+
+  /* ---- זיהוי פרק מתוך מזהה הכרטיסייה ---- */
+  var CHAPTER_TITLES={
+    '1':'הפסיכולוגיה בחיינו','2':'שיטות מחקר בפסיכולוגיה','3':'היסודות הביולוגיים',
+    '4':'תחושה ותפיסה','5':'למידה וניתוח התנהגות','6':'זיכרון',
+    '7':'חשיבה, שפה ואינטליגנציה','8':'פסיכולוגיה חברתית','9':'התפתחות',
+    '10':'מוטיבציה','11':'רגש','12':'אישיות','13':'פסיכופתולוגיה','14':'טיפול'
+  };
+  function chapterOf(id){
+    if(/^quiz_exam_/.test(id)) return null; /* כרטיסי בוחן ישנים, ללא פרק ספציפי */
+    var m=id.match(/^(?:prof|quiz)(\d+)_/);
+    if(m) return m[1];
+    if(/^prof(0[1-9]|1[0-3])$/.test(id)) return '1';
+    if(/^quiz(0[1-9]|1[0-9]|2[0-6])$/.test(id)) return '1';
+    return null;
+  }
+
+  /* ---- סיווג רמת שליטה בכרטיסייה, מבוסס על התשובה האחרונה (לא כל ההיסטוריה) ---- */
+  function classifyCard(id){
+    var c=state.cards[id];
+    if(!c || (!c.reps && !c.lapses && !c.lastQ)) return 'new';
+    if(c.lastQ){
+      /* לוגיקה חדשה: מסתמכת על התשובה האחרונה בפועל */
+      if(c.lastQ==='again') return 'hard';
+      if((c.streak||0)>=2) return 'perfect';
+      return 'known';
+    }
+    /* נתונים ישנים (מלפני העדכון) שאין להם עדיין lastQ - הערכה זמנית לפי הממוצע הכללי */
+    if((c.lapses||0)>0) return 'hard';
+    if((c.ease||2.5)>=2.8) return 'perfect';
+    return 'known';
+  }
+  function computeStats(ids){
+    var n={new:0,hard:0,known:0,perfect:0};
+    ids.forEach(function(id){ n[classifyCard(id)]++; });
+    var total=ids.length;
+    function pct(x){ return total? Math.round(x/total*100):0; }
+    return {total:total, n:n,
+      pct:{new:pct(n.new), hard:pct(n.hard), known:pct(n.known), perfect:pct(n.perfect)}};
+  }
+
+  /* ---- Firebase (optionnel) ---- */
+  var db=null, syncCode=localStorage.getItem(LS_SYNC)||'';
+  try{
+    if(typeof firebase!=='undefined'&&firebase.initializeApp){
+      if(!firebase.apps||!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db=firebase.firestore();
+    }
+  }catch(e){ console.warn('Firebase indisponible',e); db=null; }
+
+  /* ---- État de progression ---- */
+  var state={updatedAt:0,cards:{}};
+  try{ var raw=localStorage.getItem(LS_PROG); if(raw) state=JSON.parse(raw); }catch(e){}
+  if(!state.cards) state.cards={};
+
+  function persistLocal(){ state.updatedAt=now(); try{localStorage.setItem(LS_PROG,JSON.stringify(state));}catch(e){} }
+  var saveTimer=null;
+  function saveCloud(){
+    if(!db||!syncCode) return;
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(function(){
+      db.collection('progress').doc(syncCode).set(state).catch(function(e){console.warn('write fail',e);});
+    },1200);
+  }
+  function save(){ persistLocal(); saveCloud(); updateBadge(); }
+
+  function pullCloud(cb){
+    if(!db||!syncCode){ cb&&cb(); return; }
+    db.collection('progress').doc(syncCode).get().then(function(doc){
+      if(doc.exists){
+        var remote=doc.data();
+        if(remote&&(remote.updatedAt||0)>(state.updatedAt||0)){ state=remote; if(!state.cards)state.cards={}; persistLocal(); }
+        else { saveCloud(); }
+      } else { saveCloud(); }
+      cb&&cb();
+    }).catch(function(e){ console.warn('read fail',e); cb&&cb(); });
+  }
+
+  /* ---- Algoritm (SM-2 מותאם לדחיסה של 36 שעות, לא ימים) ----
+     יחידת הזמן היא שעה, לא יום. שאלות "תרגול" (QCM/מבחנים אמיתיים) מוגבלות
+     לתקרה נמוכה יותר (10ש') כדי לחזור שוב ושוב לפני המבחן; שאלות "הרצאה"
+     מוגבלות ל-20ש'. כך כל כרטיסייה חוזרת לפחות פעם-פעמיים נוספות תוך 36 השעות. */
+  function dueOf(id){ var c=state.cards[id]; return c?(c.due||0):0; } /* 0 = נעדר/חדש */
+  function isDue(id){ return dueOf(id)<=now(); }
+  function rate(id,q){
+    var c=state.cards[id]||{ease:2.5,interval:0,reps:0,lapses:0};
+    var e=c.ease||2.5, iv=c.interval||0; /* iv בשעות */
+    var tier=tierOf(cardById[id]);
+    var cap = tier===0 ? 10 : 20;
+    if(q==='again'){ c.reps=0; iv=0; e=Math.max(1.3,e-0.2); c.lapses=(c.lapses||0)+1; }
+    else if(q==='hard'){ iv=iv<=0?1.5:Math.max(1.5,iv*1.2); e=Math.max(1.3,e-0.15); c.reps=(c.reps||0)+1; }
+    else if(q==='good'){ iv=iv<=0?4:iv*e; c.reps=(c.reps||0)+1; }
+    else if(q==='easy'){ iv=iv<=0?8:iv*e*1.3; e=e+0.15; c.reps=(c.reps||0)+1; }
+    iv=Math.round(Math.min(iv,cap)*10)/10;
+    c.ease=e; c.interval=iv;
+    c.due = (q==='again') ? now() : now()+iv*HOUR;
+    /* מעקב אחר התשובה האחרונה (לצורך סיווג "מה שולט בו כרגע", לא כל ההיסטוריה) */
+    c.lastQ=q;
+    c.streak=(q==='easy') ? ((c.streak||0)+1) : 0;
+    state.cards[id]=c;
+    save();
+    return iv;
+  }
+  /* מחזירים כרטיסייה חלשה לתור הנוכחי בעוד כמה כרטיסים (לא מחכים לשעות) */
+  function requeueSoon(id,minAhead,maxAhead){
+    var pos=Math.min(queue.length, minAhead+Math.floor(Math.random()*(maxAhead-minAhead+1)));
+    queue.splice(pos,0,id);
+  }
+
+  /* ---- Notes personnelles (sauvegarde auto : local immédiat + Firebase débattu) ---- */
+  var noteMsgTimer=null;
+  function escHtml(s){ return (''+(s==null?'':s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function saveNote(id,val){
+    var c=state.cards[id]||{ease:2.5,interval:0,reps:0,lapses:0,due:0};
+    c.note=val; state.cards[id]=c;
+    persistLocal(); saveCloud();
+    var s=document.getElementById('noteSaved');
+    if(s){ s.textContent='נשמר ✓'; clearTimeout(noteMsgTimer); noteMsgTimer=setTimeout(function(){ if(s) s.textContent=''; },1400); }
+  }
+  /* ---- Réponse modifiée (null = revenir à l'original) ---- */
+  function saveAnswer(id,val){
+    var c=state.cards[id]||{ease:2.5,interval:0,reps:0,lapses:0,due:0};
+    if(val==null || !(''+val).trim()){ delete c.ans; } else { c.ans=''+val; }
+    state.cards[id]=c; persistLocal(); saveCloud();
+  }
+  /* ---- Suppression de carte ---- */
+  function isDeleted(id){ return !!(state.cards[id]&&state.cards[id].deleted); }
+  function markDeleted(id){
+    var c=state.cards[id]||{ease:2.5,interval:0,reps:0,lapses:0,due:0};
+    c.deleted=true; state.cards[id]=c; persistLocal(); saveCloud(); updateBadge();
+  }
+
+  /* ---- File de session ---- */
+  var queue=[], current=null, studyAll=false;
+  var studyScopes=[]; /* מערך ריק = כל הכרטיסים; אחרת, רשימת מספרי פרקים (כמחרוזות) שנבחרו */
+  function scopeIds(ids){
+    if(!studyScopes.length) return ids;
+    return ids.filter(function(id){ return studyScopes.indexOf(chapterOf(id))>-1; });
+  }
+  function buildQueue(){
+    var ids=CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);});
+    ids=scopeIds(ids);
+    if(!studyAll) ids=ids.filter(isDue);
+    for(var i=ids.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=ids[i];ids[i]=ids[j];ids[j]=t;}
+    /* קודם עדיפות (תרגול/QCM לפני הרצאה), ובתוך כל עדיפות — הקשות ביותר קודם */
+    ids.sort(function(a,b){
+      var ta=tierOf(cardById[a]), tb=tierOf(cardById[b]);
+      if(ta!==tb) return ta-tb;
+      var ca=state.cards[a],cb=state.cards[b];
+      var sa=(ca?ca.ease:2.5)-((ca&&ca.lapses)||0)*0.3;
+      var sb=(cb?cb.ease:2.5)-((cb&&cb.lapses)||0)*0.3;
+      return sa-sb;
+    });
+    queue=ids;
+  }
+  function dueCount(){ return scopeIds(CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);})).filter(isDue).length; }
+  function dueCounts(){
+    var q=0,l=0;
+    scopeIds(CARDS.map(function(c){return c.id;})).forEach(function(id){
+      if(isDeleted(id)||!isDue(id)) return;
+      if(tierOf(cardById[id])===0) q++; else l++;
+    });
+    return {quiz:q,lecture:l,total:q+l};
+  }
+  function formatScopeLabel(){
+    if(!studyScopes.length) return 'כל הכרטיסים';
+    var nums=studyScopes.slice().sort(function(a,b){return parseInt(a,10)-parseInt(b,10);});
+    if(nums.length===1) return 'פרק '+nums[0]+(CHAPTER_TITLES[nums[0]]?(' · '+CHAPTER_TITLES[nums[0]]):'');
+    /* בדיקה אם זהו טווח רציף */
+    var isRange=true;
+    for(var i=1;i<nums.length;i++){ if(parseInt(nums[i],10)!==parseInt(nums[i-1],10)+1){ isRange=false; break; } }
+    if(isRange) return 'פרקים '+nums[0]+'–'+nums[nums.length-1];
+    if(nums.length<=4) return 'פרקים '+nums.join(', ');
+    return nums.length+' פרקים נבחרו';
+  }
+  function updateExamTitle(){
+    var t=document.getElementById('examTitle');
+    if(!t) return;
+    t.textContent = studyScopes.length ? ('מבחן — '+formatScopeLabel()) : 'מצב מבחן — כל הכרטיסים';
+  }
+
+  /* ---- UI ---- */
+  var area=document.getElementById('examArea');
+  var countEl=document.getElementById('examCount');
+  var letters=['א','ב','ג','ד','ה'];
+  function esc(){ return; }
+
+  function next(){
+    if(!queue.length){ render(); return; }
+    var id=queue.shift();
+    current=CARDS.filter(function(c){return c.id===id;})[0];
+    render();
+  }
+
+  function render(){
+    if(studyAll){ countEl.textContent='נותרו '+queue.length; }
+    else{ var dc=dueCounts(); countEl.textContent='לחזרה: '+dc.quiz+' תרגול · '+dc.lecture+' הרצאה'; }
+    if(!current && !queue.length){ renderEmpty(); return; }
+    if(!current){ next(); return; }
+    var c=current;
+    var tier=tierOf(c);
+    var h='<div class="fcard '+(tier===0?'tier-quiz':'tier-lecture')+'">'+
+          (tier===0
+            ? '<div class="imp-banner quiz-banner"><span class="imp-stars">🎯</span> שאלת תרגול / בחינה — סבירות גבוהה מאוד <span class="imp-stars">🎯</span></div>'
+            : '<div class="imp-banner lecture-banner"><span class="imp-stars">⭐</span> שאלת הרצאה — חשוב להבנה <span class="imp-stars">⭐</span></div>')+
+          '<div class="fcard-q" id="fcardQ">'+c.q+'</div>'+
+          (c.explain ? '<button class="explain-btn" id="explainBtn"><span class="bulb">💡</span> הסבר מהיר</button>' : '');
+    if(c.type==='mcq'){
+      h+='<div class="mcq-opts" id="mcqOpts">';
+      c.options.forEach(function(op,i){
+        h+='<button class="mcq-opt" data-i="'+i+'"><span class="lett">'+letters[i]+'.</span><span>'+op+'</span></button>';
+      });
+      h+='</div></div>';
+    } else {
+      var st0=state.cards[c.id]||{};
+      var edited0 = st0.ans!=null;
+      var effHtml = edited0 ? escHtml(st0.ans).replace(/\n/g,'<br>') : c.a;
+      h+='<div class="fcard-a" id="fcardA">'+
+           '<div id="ansView">'+effHtml+(edited0?' <span class="edited-tag">(נערך)</span>':'')+'</div>'+
+           '<div class="ans-tools" id="ansTools">'+
+             '<button class="mini-btn" id="editAnsBtn">✏️ ערוך תשובה</button>'+
+             '<button class="mini-btn" id="origBtn" style="display:'+(edited0?'inline-flex':'none')+'">↩︎ הצג תשובה מקורית</button>'+
+           '</div>'+
+           '<div class="ans-orig" id="ansOrig" style="display:none"><div class="orig-label">תשובה מקורית:</div>'+c.a+'</div>'+
+         '</div></div>'+
+         '<button class="reveal-btn" id="revealBtn">הצג תשובה</button>';
+    }
+    h+='<div class="rate" id="rate">'+
+       '<button class="r-again" data-q="again">שוב<small>נכשלתי</small></button>'+
+       '<button class="r-hard" data-q="hard">קשה<small>בקושי</small></button>'+
+       '<button class="r-good" data-q="good">טוב<small>ידעתי</small></button>'+
+       '<button class="r-easy" data-q="easy">קל<small>בקלות</small></button></div>';
+    var savedNote=(state.cards[c.id]&&state.cards[c.id].note)||'';
+    h+='<div class="fnotes" id="fnotes">'+
+       '<label>📝 הערות אישיות (טריק לזכירה)</label>'+
+       '<textarea id="noteBox" placeholder="כתבו כאן איך לזכור את התשובה: טריק, דוגמה, קישור…"></textarea>'+
+       '<span class="note-saved" id="noteSaved"></span>'+
+       '<div class="fnotes-foot">'+
+         '<button class="del-btn" id="delBtn">🗑 מחק כרטיסייה</button>'+
+         '<span class="del-confirm" id="delConfirm" style="display:none">בטוח שברצונך למחוק? '+
+           '<button id="delYes">כן, מחק</button><button id="delNo">ביטול</button></span>'+
+       '</div></div>';
+    area.innerHTML=h;
+
+    /* ---- bouton "הסבר מורחב" (popup avec le résumé complet du concept) ---- */
+    var explainBtn=document.getElementById('explainBtn');
+    if(explainBtn){
+      explainBtn.addEventListener('click',function(){
+        var modal=document.getElementById('explainModal');
+        var content=document.getElementById('explainContent');
+        var full=c.explain||'';
+        var plain=full.replace(/<[^>]+>/g,'');
+        var LIMIT=280;
+        if(plain.length<=LIMIT){
+          content.innerHTML=full;
+        } else {
+          /* חיתוך בגבול משפט קרוב ל-280 תווים, לא באמצע מילה */
+          var cut=full.slice(0,LIMIT);
+          var lastEnd=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('- '),cut.lastIndexOf(': '));
+          var shortHtml=(lastEnd>90?cut.slice(0,lastEnd+1):cut)+'…';
+          content.innerHTML='<div id="explainShort">'+shortHtml+'</div>'+
+            '<button class="mini-btn save" id="explainMoreBtn" style="margin-top:10px">הצג הסבר מלא</button>'+
+            '<div id="explainFull" style="display:none;margin-top:12px">'+full+'</div>';
+          var moreBtn=document.getElementById('explainMoreBtn');
+          moreBtn.addEventListener('click',function(){
+            document.getElementById('explainShort').style.display='none';
+            moreBtn.style.display='none';
+            document.getElementById('explainFull').style.display='block';
+          });
+        }
+        modal.classList.add('open');
+      });
+    }
+
+    /* notes : pré-remplir + sauvegarde automatique (local + Firebase) */
+    var noteBox=document.getElementById('noteBox');
+    if(noteBox){
+      noteBox.value=savedNote;
+      noteBox.addEventListener('input',function(){ saveNote(c.id,noteBox.value); });
+    }
+    function showNotes(){ var fn=document.getElementById('fnotes'); if(fn) fn.classList.add('show'); }
+
+    /* ---- édition de la réponse (cartes ouvertes uniquement) ---- */
+    if(c.type!=='mcq'){
+      var origBtn=document.getElementById('origBtn');
+      if(origBtn) origBtn.addEventListener('click',function(){
+        var o=document.getElementById('ansOrig');
+        var show=o.style.display==='none';
+        o.style.display=show?'block':'none';
+        origBtn.textContent=show?'הסתר תשובה מקורית':'↩︎ הצג תשובה מקורית';
+      });
+      function refreshAns(){
+        var st=state.cards[c.id]||{}; var ed=st.ans!=null;
+        var v=document.getElementById('ansView');
+        v.innerHTML=(ed?escHtml(st.ans).replace(/\n/g,'<br>'):c.a)+(ed?' <span class="edited-tag">(נערך)</span>':'');
+        v.style.display=''; document.getElementById('ansTools').style.display='';
+        var ob=document.getElementById('origBtn'); ob.style.display=ed?'inline-flex':'none'; ob.textContent='↩︎ הצג תשובה מקורית';
+        document.getElementById('ansOrig').style.display='none';
+      }
+      var editBtn=document.getElementById('editAnsBtn');
+      if(editBtn) editBtn.addEventListener('click',function(){
+        var view=document.getElementById('ansView'), tools=document.getElementById('ansTools');
+        var st=state.cards[c.id]||{};
+        var cur = st.ans!=null ? st.ans : c.a.replace(/<[^>]+>/g,'');
+        var box=document.createElement('div');
+        box.id='ansEditBox';
+        box.innerHTML='<textarea class="ans-edit" id="ansEdit"></textarea>'+
+          '<div class="ans-edit-tools">'+
+            '<button class="mini-btn save" id="ansSave">שמירה</button>'+
+            '<button class="mini-btn" id="ansCancel">ביטול</button>'+
+            '<button class="mini-btn warn" id="ansRestore">שחזר מקור</button>'+
+          '</div>';
+        view.style.display='none'; tools.style.display='none';
+        document.getElementById('ansOrig').style.display='none';
+        view.parentNode.insertBefore(box,view);
+        var ta=document.getElementById('ansEdit'); ta.value=cur; ta.focus();
+        function closeBox(){ var b=document.getElementById('ansEditBox'); if(b) b.parentNode.removeChild(b); }
+        document.getElementById('ansSave').addEventListener('click',function(){ saveAnswer(c.id,ta.value); closeBox(); refreshAns(); });
+        document.getElementById('ansCancel').addEventListener('click',function(){ closeBox(); view.style.display=''; tools.style.display=''; });
+        document.getElementById('ansRestore').addEventListener('click',function(){ saveAnswer(c.id,null); closeBox(); refreshAns(); });
+      });
+    }
+
+    /* ---- suppression de la carte (avec confirmation) ---- */
+    var delBtn=document.getElementById('delBtn');
+    if(delBtn){
+      delBtn.addEventListener('click',function(){
+        delBtn.style.display='none';
+        document.getElementById('delConfirm').style.display='inline';
+      });
+      document.getElementById('delNo').addEventListener('click',function(){
+        document.getElementById('delConfirm').style.display='none';
+        delBtn.style.display='inline-flex';
+      });
+      document.getElementById('delYes').addEventListener('click',function(){
+        markDeleted(c.id); current=null; next();
+      });
+    }
+
+    if(c.type==='mcq'){
+      var opts=area.querySelectorAll('.mcq-opt');
+      opts.forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var i=+btn.getAttribute('data-i');
+          opts.forEach(function(b){b.setAttribute('disabled','');});
+          opts[c.correct].classList.add('correct');
+          if(i!==c.correct) btn.classList.add('wrong');
+          document.getElementById('rate').classList.add('show');
+          showNotes();
+        });
+      });
+    } else {
+      document.getElementById('revealBtn').addEventListener('click',function(){
+        var q=document.getElementById('fcardQ');
+        if(q) q.style.display='none';
+        document.getElementById('fcardA').classList.add('show');
+        this.style.display='none';
+        document.getElementById('rate').classList.add('show');
+        showNotes();
+        area.scrollTop=0;
+      });
+    }
+    area.querySelectorAll('.rate button').forEach(function(b){
+      b.addEventListener('click',function(){
+        var q=b.getAttribute('data-q'), id=current.id;
+        rate(id,q);
+        /* כרטיסים חלשים חוזרים תוך כמה כרטיסים באותה הפעלה, לא מחכים לשעות */
+        if(q==='again') requeueSoon(id,4,8);
+        else if(q==='hard') requeueSoon(id,14,22);
+        current=null; next();
+      });
+    });
+  }
+
+  function renderEmpty(){
+    var dc=dueCounts(), n=dc.total;
+    area.innerHTML='<div class="exam-empty"><div class="big">כל הכבוד! 🎉</div>'+
+      '<p>'+(n?('יש '+n+' כרטיסים לחזרה ('+dc.quiz+' תרגול · '+dc.lecture+' הרצאה).'):'אין כרגע כרטיסים לחזרה. חזרו בעוד כמה שעות, או תרגלו את כל הכרטיסים עכשיו.')+'</p>'+
+      '<button id="studyAllBtn">'+(n?'התחלת חזרה':'תרגול כל הכרטיסים')+'</button></div>';
+    document.getElementById('studyAllBtn').addEventListener('click',function(){
+      if(!n){ studyAll=true; } else { studyAll=false; }
+      startSession();
+    });
+  }
+
+  /* ---- פרקים + סטטיסטיקה (בחירה מרובה) ---- */
+  function chapRowHtml(scope,title,stats,checked){
+    return '<div class="chap-row'+(scope==='all'?' chap-all':'')+(checked?' selected':'')+'" data-scope="'+scope+'">'+
+      '<div class="chap-row-head"><span><span class="chap-check">'+(checked?'✓':'')+'</span>'+title+'</span><span class="chap-count">'+stats.total+' כרטיסים</span></div>'+
+      '<div class="stat-bar">'+
+        (stats.pct.perfect?'<span class="sb-perfect" style="width:'+stats.pct.perfect+'%"></span>':'')+
+        (stats.pct.known?'<span class="sb-known" style="width:'+stats.pct.known+'%"></span>':'')+
+        (stats.pct.hard?'<span class="sb-hard" style="width:'+stats.pct.hard+'%"></span>':'')+
+        (stats.pct.new?'<span class="sb-new" style="width:'+stats.pct.new+'%"></span>':'')+
+      '</div>'+
+      '<div class="stat-legend">'+
+        '<span class="lg">🟢 מושלם '+stats.pct.perfect+'%</span>'+
+        '<span class="lg">🔵 ידוע '+stats.pct.known+'%</span>'+
+        '<span class="lg">🟠 קשה '+stats.pct.hard+'%</span>'+
+        '<span class="lg">⚪ לא נלמד '+stats.pct.new+'%</span>'+
+      '</div>'+
+    '</div>';
+  }
+  function renderChaptersPanel(){
+    var allIds=CARDS.map(function(c){return c.id;}).filter(function(id){return !isDeleted(id);});
+    var body=document.getElementById('chapBody');
+
+    var byChap={};
+    allIds.forEach(function(id){ var ch=chapterOf(id); if(ch) (byChap[ch]=byChap[ch]||[]).push(id); });
+    var nums=Object.keys(byChap).sort(function(a,b){return parseInt(a,10)-parseInt(b,10);});
+
+    var html='<p class="chap-sub">בחרו פרק אחד, כמה פרקים, או טווח שלם — ואז לחצו \"התחל תרגול\". אפשר גם \"כל הכרטיסים\" להתעלם מהבחירה.</p>';
+
+    /* בורר טווח מהיר */
+    html+='<div class="chap-range">'+
+      '<label>מפרק</label><select id="rangeFrom">'+nums.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('')+'</select>'+
+      '<label>עד פרק</label><select id="rangeTo">'+nums.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('')+'</select>'+
+      '<button id="rangeAddBtn" type="button">הוסף טווח לבחירה</button>'+
+    '</div>';
+
+    html+='<div class="chap-toolbar">'+
+      '<button class="chap-tool-btn" id="chapSelectAllBtn" type="button">בחר את כל הפרקים</button>'+
+      '<button class="chap-tool-btn" id="chapClearBtn" type="button">נקה בחירה</button>'+
+    '</div>';
+
+    html+=chapRowHtml('all','כל הכרטיסים',computeStats(allIds), studyScopes.length===0);
+
+    nums.forEach(function(num){
+      var title='פרק '+num+(CHAPTER_TITLES[num]?(' — '+CHAPTER_TITLES[num]):'');
+      html+=chapRowHtml(num,title,computeStats(byChap[num]), studyScopes.indexOf(num)>-1);
+    });
+
+    html+='<div class="chap-footer">'+
+      '<div class="chap-sel-note" id="chapSelNote"></div>'+
+      '<button class="chap-start-btn" id="chapStartBtn" type="button">התחל תרגול</button>'+
+    '</div>';
+
+    body.innerHTML=html;
+
+    function refreshUI(){
+      body.querySelectorAll('.chap-row').forEach(function(row){
+        var sc=row.getAttribute('data-scope');
+        var isSel = sc==='all' ? (studyScopes.length===0) : (studyScopes.indexOf(sc)>-1);
+        row.classList.toggle('selected', isSel);
+        var chk=row.querySelector('.chap-check');
+        if(chk) chk.textContent = isSel ? '✓' : '';
+      });
+      var note=document.getElementById('chapSelNote');
+      if(note) note.textContent = studyScopes.length ? ('נבחרו: '+formatScopeLabel()) : 'נבחר: כל הכרטיסים';
+    }
+    refreshUI();
+
+    body.querySelectorAll('.chap-row').forEach(function(row){
+      row.addEventListener('click',function(){
+        var sc=row.getAttribute('data-scope');
+        if(sc==='all'){ studyScopes=[]; }
+        else{
+          var idx=studyScopes.indexOf(sc);
+          if(idx>-1) studyScopes.splice(idx,1); else studyScopes.push(sc);
+        }
+        refreshUI();
+      });
+    });
+
+    document.getElementById('chapSelectAllBtn').addEventListener('click',function(){
+      studyScopes=nums.slice(); refreshUI();
+    });
+    document.getElementById('chapClearBtn').addEventListener('click',function(){
+      studyScopes=[]; refreshUI();
+    });
+    document.getElementById('rangeAddBtn').addEventListener('click',function(){
+      var a=parseInt(document.getElementById('rangeFrom').value,10);
+      var b=parseInt(document.getElementById('rangeTo').value,10);
+      if(a>b){ var t=a;a=b;b=t; }
+      nums.forEach(function(n){
+        var ni=parseInt(n,10);
+        if(ni>=a && ni<=b && studyScopes.indexOf(n)===-1) studyScopes.push(n);
+      });
+      refreshUI();
+    });
+    document.getElementById('chapStartBtn').addEventListener('click',function(){
+      updateExamTitle();
+      document.getElementById('examChaptersPanel').classList.remove('open');
+      studyAll=false;
+      if(dueCount()===0){ renderEmpty(); } else { startSession(); }
+    });
+  }
+
+  function startSession(){ buildQueue(); current=null; next(); }
+
+  function updateBadge(){
+    var b=document.getElementById('examBadge'); if(!b) return;
+    var n=dueCount();
+    if(n>0){ b.style.display='inline-flex'; b.textContent=n>99?'99+':n; }
+    else b.style.display='none';
+  }
+
+  /* ---- Ouvrture / fermeture ---- */
+  var exam=document.getElementById('exam');
+  function openExam(){
+    exam.classList.add('open');
+    document.body.classList.add('exam-open');
+    updateExamTitle();
+    pullCloud(function(){ updateBadge(); studyAll=false; if(dueCount()===0){renderEmpty();} else {startSession();} });
+  }
+  function closeExam(){ exam.classList.remove('open'); document.body.classList.remove('exam-open'); }
+  /* le bouton est déjà câblé plus haut : on expose openExam et on ouvre si déjà demandé */
+  __examOpen=openExam; __examReady=true;
+  if(exam.classList.contains('open')) openExam();
+
+  /* ---- פרקים וסטטיסטיקה ---- */
+  var chapPanel=document.getElementById('examChaptersPanel');
+  document.getElementById('examChapters').addEventListener('click',function(){
+    renderChaptersPanel();
+    chapPanel.classList.add('open');
+  });
+  document.getElementById('chapBack').addEventListener('click',function(){ chapPanel.classList.remove('open'); });
+
+  /* ---- Réglages ---- */
+  var setPanel=document.getElementById('examSettings');
+  var syncInput=document.getElementById('syncInput');
+  var syncState=document.getElementById('syncState');
+  function refreshSyncState(){
+    if(syncCode){ syncState.textContent='סנכרון פעיל · קוד: '+syncCode+(db?'':' (אופליין)'); syncState.className='sync-state sync-on'; }
+    else { syncState.textContent='סנכרון כבוי'; syncState.className='sync-state sync-off'; }
+  }
+  document.getElementById('examSet').addEventListener('click',function(){ syncInput.value=syncCode; refreshSyncState(); setPanel.classList.add('open'); });
+  document.getElementById('setBack').addEventListener('click',function(){ setPanel.classList.remove('open'); updateBadge(); if(exam.classList.contains('open')){ if(dueCount()===0)renderEmpty(); else startSession(); } });
+  document.getElementById('syncSave').addEventListener('click',function(){
+    syncCode=(syncInput.value||'').trim().replace(/[^A-Za-z0-9_\-]/g,'');
+    localStorage.setItem(LS_SYNC,syncCode);
+    refreshSyncState();
+    pullCloud(function(){ refreshSyncState(); updateBadge(); });
+  });
+  document.getElementById('btnExport').addEventListener('click',function(){
+    var box=document.getElementById('ioBox'); box.value=JSON.stringify(state);
+    box.select(); try{document.execCommand('copy');}catch(e){}
+  });
+  document.getElementById('btnImport').addEventListener('click',function(){
+    try{ var o=JSON.parse(document.getElementById('ioBox').value); if(o&&o.cards){ state=o; persistLocal(); saveCloud(); updateBadge(); alert('יובא בהצלחה ✓'); } }
+    catch(e){ alert('קוד לא תקין'); }
+  });
+  document.getElementById('btnReset').addEventListener('click',function(){
+    if(confirm('לאפס את כל ההתקדמות?')){ state={updatedAt:now(),cards:{}}; persistLocal(); saveCloud(); updateBadge(); }
+  });
+
+  /* badge initial */
+  if(syncCode) pullCloud(updateBadge); else updateBadge();
+  __examReady = true;
+  }catch(e){
+    console.error(e);
+    showExamError('שגיאת JS במצב מבחן (initExam):\n'+(e && e.stack || e));
+  }
+}
+</script>
+</body>
+</html>
